@@ -29,65 +29,80 @@ import SensorStatus from '../components/SensorStatus.astro';
 
       <div class="flex flex-col items-center gap-6">
         {/* Compass Display */}
-        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[380px] sm:w-[380px]">
-          <div class="absolute inset-4 rounded-full border border-hairline"></div>
+        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center sm:h-[380px] sm:w-[380px]">
+          {/* Outer Metallic Ring */}
+          <div class="compass-outer-ring absolute inset-0 rounded-full"></div>
 
-          {/* Cardinal Labels */}
-          <span class="absolute top-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-ink">N</span>
-          <span class="absolute bottom-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-mute">S</span>
-          <span class="absolute top-1/2 left-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">W</span>
-          <span class="absolute top-1/2 right-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">E</span>
+          {/* North Marker (red triangle at top of ring) */}
+          <div class="compass-north-marker absolute -top-0 left-1/2 h-0 w-0 -translate-x-1/2" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 14px solid #cc0000;"></div>
 
-          {/* Degree Markers */}
-          {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
-            <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
-              <div class:list={[
-                'mx-auto',
-                deg % 90 === 0 ? 'h-3 w-[2px] bg-ink' : deg % 30 === 0 ? 'h-2.5 w-px bg-hairline-strong' : deg % 15 === 0 ? 'h-2 w-px bg-hairline' : 'h-1.5 w-px bg-hairline/60',
-              ]}></div>
-            </div>
-          ))}
+          {/* Inner Compass Face */}
+          <div id="compass-face" class="compass-inner-face absolute inset-[12px] rounded-full sm:inset-[14px]">
+            {/* Degree Markers */}
+            {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
+              <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
+                <div class:list={[
+                  'mx-auto',
+                  deg % 90 === 0 ? 'h-4 w-[2px]' : deg % 30 === 0 ? 'h-3 w-[1.5px]' : deg % 15 === 0 ? 'h-2.5 w-px' : 'h-2 w-px',
+                ]} style={{
+                  background: deg % 90 === 0
+                    ? (deg === 0 ? '#cc0000' : 'var(--color-ink)')
+                    : deg % 30 === 0
+                    ? 'var(--color-body)'
+                    : deg % 15 === 0
+                    ? 'var(--color-mute)'
+                    : 'var(--color-hairline-strong)',
+                }}></div>
+              </div>
+            ))}
 
-          {/* Intercardinal labels */}
-          {[
-            { label: 'NE', angle: 45 },
-            { label: 'SE', angle: 135 },
-            { label: 'SW', angle: 225 },
-            { label: 'NW', angle: 315 },
-          ].map(({ label, angle }) => {
-            const rad = (angle - 90) * (Math.PI / 180);
-            const r = 128;
-            return (
-              <span
-                class="absolute text-[9px] font-mono text-mute"
-                style={{
-                  left: `calc(50% + ${r * Math.cos(rad)}px)`,
-                  top: `calc(50% + ${r * Math.sin(rad)}px)`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                {label}
-              </span>
-            );
-          })}
+            {/* Cardinal Labels */}
+            <span class="compass-cardinal-label absolute top-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-error sm:text-[16px]">N</span>
+            <span class="compass-cardinal-label absolute bottom-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-ink sm:text-[16px]">S</span>
+            <span class="compass-cardinal-label absolute top-1/2 left-6 -translate-y-1/2 text-[14px] font-mono text-ink sm:text-[16px]">W</span>
+            <span class="compass-cardinal-label absolute top-1/2 right-6 -translate-y-1/2 text-[14px] font-mono text-ink sm:text-[16px]">E</span>
+
+            {/* Intercardinal Labels */}
+            {[
+              { label: 'NE', angle: 45 },
+              { label: 'SE', angle: 135 },
+              { label: 'SW', angle: 225 },
+              { label: 'NW', angle: 315 },
+            ].map(({ label, angle }) => {
+              const rad = (angle - 90) * (Math.PI / 180);
+              const r = 110;
+              return (
+                <span
+                  class="compass-intercardinal-label absolute text-[10px] font-mono text-body sm:text-[11px]"
+                  style={{
+                    left: `calc(50% + ${r * Math.cos(rad)}px)`,
+                    top: `calc(50% + ${r * Math.sin(rad)}px)`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  {label}
+                </span>
+              );
+            })}
+          </div>
 
           {/* Compass Needle */}
           <div id="compass-needle" class="absolute h-full w-full" style="transform: rotate(0deg);">
-            {/* North (Red) */}
+            {/* North (Red) - Tapered diamond shape */}
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error"></div>
+              <div class="compass-needle-north" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 105px solid #cc0000;"></div>
             </div>
-            {/* South (Gray) */}
+            {/* South (Dark) - Tapered diamond shape */}
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
-              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[110px] border-l-transparent border-r-transparent border-t-hairline-strong"></div>
+              <div class="compass-needle-south" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 105px solid #2d2d44;"></div>
             </div>
           </div>
 
-          {/* Center Dot */}
-          <div class="absolute h-3 w-3 rounded-full bg-ink shadow-card"></div>
+          {/* Center Hub */}
+          <div class="compass-center-hub absolute h-5 w-5 rounded-full sm:h-6 sm:w-6"></div>
 
-          {/* North Indicator (subtle glow when near north) */}
-          <div id="north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.12) 0%, transparent 30%)"></div>
+          {/* North Glow Feedback */}
+          <div id="north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.15) 0%, transparent 25%);"></div>
         </div>
 
         {/* Degree Display */}
@@ -142,30 +157,76 @@ import SensorStatus from '../components/SensorStatus.astro';
       </button>
     </div>
 
-    <div class="relative flex h-[min(80vw,380px)] w-[min(80vw,380px)] items-center justify-center rounded-full bg-canvas shadow-elevated">
-      <div class="absolute inset-4 rounded-full border border-hairline"></div>
-      <span class="absolute top-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-ink">N</span>
-      <span class="absolute bottom-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-mute">S</span>
-      <span class="absolute top-1/2 left-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">W</span>
-      <span class="absolute top-1/2 right-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">E</span>
-      {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
-        <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
-          <div class:list={[
-            'mx-auto',
-            deg % 90 === 0 ? 'h-3 w-[2px] bg-ink' : deg % 30 === 0 ? 'h-2.5 w-px bg-hairline-strong' : 'h-1.5 w-px bg-hairline/60',
-          ]}></div>
-        </div>
-      ))}
+    <div class="relative flex h-[min(80vw,380px)] w-[min(80vw,380px)] items-center justify-center">
+      {/* Outer Metallic Ring */}
+      <div class="compass-outer-ring absolute inset-0 rounded-full"></div>
+
+      {/* North Marker */}
+      <div class="compass-north-marker absolute -top-0 left-1/2 h-0 w-0 -translate-x-1/2" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 14px solid #cc0000;"></div>
+
+      {/* Inner Compass Face */}
+      <div class="compass-inner-face absolute inset-[12px] rounded-full">
+        {/* Degree Markers */}
+        {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
+          <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
+            <div class:list={[
+              'mx-auto',
+              deg % 90 === 0 ? 'h-4 w-[2px]' : deg % 30 === 0 ? 'h-3 w-[1.5px]' : 'h-2.5 w-px',
+            ]} style={{
+              background: deg % 90 === 0
+                ? (deg === 0 ? '#cc0000' : 'var(--color-ink)')
+                : deg % 30 === 0
+                ? 'var(--color-body)'
+                : 'var(--color-mute)',
+            }}></div>
+          </div>
+        ))}
+
+        {/* Cardinal Labels */}
+        <span class="compass-cardinal-label absolute top-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-error">N</span>
+        <span class="compass-cardinal-label absolute bottom-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-ink">S</span>
+        <span class="compass-cardinal-label absolute top-1/2 left-6 -translate-y-1/2 text-[14px] font-mono text-ink">W</span>
+        <span class="compass-cardinal-label absolute top-1/2 right-6 -translate-y-1/2 text-[14px] font-mono text-ink">E</span>
+
+        {/* Intercardinal Labels */}
+        {[
+          { label: 'NE', angle: 45 },
+          { label: 'SE', angle: 135 },
+          { label: 'SW', angle: 225 },
+          { label: 'NW', angle: 315 },
+        ].map(({ label, angle }) => {
+          const rad = (angle - 90) * (Math.PI / 180);
+          const r = 110;
+          return (
+            <span
+              class="compass-intercardinal-label absolute text-[10px] font-mono text-body"
+              style={{
+                left: `calc(50% + ${r * Math.cos(rad)}px)`,
+                top: `calc(50% + ${r * Math.sin(rad)}px)`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              {label}
+            </span>
+          );
+        })}
+      </div>
+
+      {/* Compass Needle */}
       <div id="fs-needle" class="absolute h-full w-full" style="transform: rotate(0deg);">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-          <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error"></div>
+          <div class="compass-needle-north" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 105px solid #cc0000;"></div>
         </div>
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
-          <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[110px] border-l-transparent border-r-transparent border-t-hairline-strong"></div>
+          <div class="compass-needle-south" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 105px solid #2d2d44;"></div>
         </div>
       </div>
-      <div class="absolute h-3 w-3 rounded-full bg-ink shadow-card"></div>
-      <div id="fs-north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.12) 0%, transparent 30%)"></div>
+
+      {/* Center Hub */}
+      <div class="compass-center-hub absolute h-5 w-5 rounded-full"></div>
+
+      {/* North Glow Feedback */}
+      <div id="fs-north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.15) 0%, transparent 25%);"></div>
     </div>
 
     <div class="mt-6 text-center">
@@ -221,13 +282,12 @@ import SensorStatus from '../components/SensorStatus.astro';
 
 <script>
   // DOM elements
-  const needle = document.getElementById('compass-needle');
+  const needleEl = document.getElementById('compass-needle');
   const degreesEl = document.getElementById('compass-degrees');
   const directionEl = document.getElementById('compass-direction');
   const messageEl = document.getElementById('compass-message');
   const statusEl = document.getElementById('compass-sensor-status');
   const northGlow = document.getElementById('north-glow');
-  const compassContainer = document.getElementById('compass-container');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   const fullscreenOverlay = document.getElementById('compass-fullscreen');
   const fullscreenClose = document.getElementById('fullscreen-close');
@@ -247,13 +307,13 @@ import SensorStatus from '../components/SensorStatus.astro';
   // State
   let isRunning = false;
   let isFullscreen = false;
-  let targetHeading = 0;
-  let displayHeading = 0;
-  let animating = false;
+  let rawHeading = 0;       // Latest sensor reading — used for all display text
+  let displayHeading = 0;   // Smoothed value — used only for needle rotation
+  let lastFrameTime = 0;
 
-  // Smoothing config
-  const LERP_SPEED = 0.12;
-  const DEAD_ZONE = 1.0;
+  // Animation config — visual only, zero impact on accuracy
+  const LERP_SPEED = 0.18;        // Needle interpolation per frame (~0.18 = smooth but responsive)
+  const DEAD_ZONE = 0.3;          // Minimal dead zone — preserve all real movement
   const NORTH_THRESHOLD = 2;
 
   // --- Helpers ---
@@ -328,15 +388,18 @@ import SensorStatus from '../components/SensorStatus.astro';
     return diff;
   }
 
-  function animate() {
-    const diff = shortestRotation(displayHeading, targetHeading);
+  function animate(now: number) {
+    // Interpolate needle rotation toward raw heading (visual only)
+    const diff = shortestRotation(displayHeading, rawHeading);
 
     if (Math.abs(diff) > DEAD_ZONE) {
       displayHeading += diff * LERP_SPEED;
       displayHeading = ((displayHeading % 360) + 360) % 360;
+    } else {
+      displayHeading = rawHeading;
     }
 
-    updateDisplay(displayHeading);
+    updateDisplay(rawHeading, displayHeading);
     requestAnimationFrame(animate);
   }
 
@@ -348,30 +411,24 @@ import SensorStatus from '../components/SensorStatus.astro';
 
     if (northGlow) northGlow.style.opacity = isNearNorth ? '1' : '0';
     if (fsNorthGlow) fsNorthGlow.style.opacity = isNearNorth ? '1' : '0';
-
-    const nLabel = compassContainer?.querySelector('.absolute.top-5');
-    if (nLabel) {
-      nLabel.classList.toggle('text-error', isNearNorth);
-      nLabel.classList.toggle('text-ink', !isNearNorth);
-    }
   }
 
   // --- Update Display ---
 
-  function updateDisplay(heading: number) {
-    const rounded = Math.round(heading);
-    const cardinal = getCardinal(heading);
-    const dirName = getDirectionName(heading);
+  function updateDisplay(raw: number, needle: number) {
+    const rounded = Math.round(raw);
+    const cardinal = getCardinal(raw);
+    const dirName = getDirectionName(raw);
 
-    if (needle) needle.style.transform = `rotate(${-heading}deg)`;
+    if (needleEl) needleEl.style.transform = `rotate(${-needle}deg)`;
     if (degreesEl) degreesEl.textContent = rounded.toString();
     if (directionEl) directionEl.textContent = `${dirName} (${cardinal})`;
 
-    if (fsNeedle) fsNeedle.style.transform = `rotate(${-heading}deg)`;
+    if (fsNeedle) fsNeedle.style.transform = `rotate(${-needle}deg)`;
     if (fsDegrees) fsDegrees.textContent = rounded.toString();
     if (fsDirection) fsDirection.textContent = dirName;
 
-    updateNorthFeedback(heading);
+    updateNorthFeedback(raw);
   }
 
   // --- Orientation Handler ---
@@ -391,7 +448,7 @@ import SensorStatus from '../components/SensorStatus.astro';
 
     if (!isRunning) {
       isRunning = true;
-      targetHeading = raw;
+      rawHeading = raw;
       displayHeading = raw;
       hideMessage();
       hideModal();
@@ -399,7 +456,7 @@ import SensorStatus from '../components/SensorStatus.astro';
       requestAnimationFrame(animate);
     }
 
-    targetHeading = raw;
+    rawHeading = raw;
   }
 
   // --- Fullscreen ---
