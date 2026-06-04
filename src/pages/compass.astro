@@ -420,12 +420,12 @@ import SensorStatus from '../components/SensorStatus.astro';
     const cardinal = getCardinal(raw);
     const dirName = getDirectionName(raw);
 
-    if (needleEl) needleEl.style.transform = `rotate(${-needle}deg)`;
-    if (degreesEl) degreesEl.textContent = rounded.toString();
+    if (needleEl) needleEl.style.transform = `rotate(${needle}deg)`;
+    if (degreesEl) degreesEl.textContent = ((rounded % 360) + 360) % 360 + '';
     if (directionEl) directionEl.textContent = `${dirName} (${cardinal})`;
 
-    if (fsNeedle) fsNeedle.style.transform = `rotate(${-needle}deg)`;
-    if (fsDegrees) fsDegrees.textContent = rounded.toString();
+    if (fsNeedle) fsNeedle.style.transform = `rotate(${needle}deg)`;
+    if (fsDegrees) fsDegrees.textContent = ((rounded % 360) + 360) % 360 + '';
     if (fsDirection) fsDirection.textContent = dirName;
 
     updateNorthFeedback(raw);
