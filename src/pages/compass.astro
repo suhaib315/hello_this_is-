@@ -13,42 +13,98 @@ import SensorStatus from '../components/SensorStatus.astro';
           </h1>
           <p class="mt-2 text-sm text-body">Digital compass showing real-time direction</p>
         </div>
-        <SensorStatus id="compass-sensor-status" />
+        <div class="flex items-center gap-3">
+          <button
+            id="fullscreen-btn"
+            class="flex h-8 w-8 items-center justify-center rounded-full border border-hairline bg-canvas text-body transition-colors hover:bg-canvas-soft-2 hover:text-ink"
+            aria-label="Toggle fullscreen compass"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 5V1h4M9 1h4v4M13 9v4H9M5 13H1V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <SensorStatus id="compass-sensor-status" />
+        </div>
       </div>
 
-      <div class="flex flex-col items-center gap-8">
+      <div class="flex flex-col items-center gap-6">
+        {/* Calibration Guidance */}
+        <div id="calibration-msg" class="hidden items-center gap-2 rounded-full bg-warning-soft px-4 py-2 text-xs font-medium text-warning-deep">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1v4M7 9v4M1 7h4M9 7h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          Move in a figure-8 to improve accuracy
+        </div>
+
         {/* Compass Display */}
-        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
+        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center rounded-full bg-canvas shadow-elevated transition-all duration-300 sm:h-[380px] sm:w-[380px]">
           <div class="absolute inset-4 rounded-full border border-hairline"></div>
-          <span class="absolute top-6 left-1/2 -translate-x-1/2 text-xs font-mono font-semibold text-ink">N</span>
-          <span class="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs font-mono font-semibold text-ink">S</span>
-          <span class="absolute top-1/2 left-6 -translate-y-1/2 text-xs font-mono font-semibold text-ink">W</span>
-          <span class="absolute top-1/2 right-6 -translate-y-1/2 text-xs font-mono font-semibold text-ink">E</span>
-          {Array.from({ length: 36 }, (_, i) => i * 10).map((deg) => (
+
+          {/* Cardinal Labels */}
+          <span class="absolute top-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-ink dark:text-ink">N</span>
+          <span class="absolute bottom-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-mute">S</span>
+          <span class="absolute top-1/2 left-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">W</span>
+          <span class="absolute top-1/2 right-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">E</span>
+
+          {/* Degree Markers */}
+          {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
             <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
               <div class:list={[
-                'mx-auto bg-hairline',
-                deg % 90 === 0 ? 'h-4 w-0.5 bg-ink' : deg % 30 === 0 ? 'h-3 w-px' : 'h-2 w-px',
+                'mx-auto',
+                deg % 90 === 0 ? 'h-3 w-[2px] bg-ink' : deg % 30 === 0 ? 'h-2.5 w-px bg-hairline-strong' : deg % 15 === 0 ? 'h-2 w-px bg-hairline' : 'h-1.5 w-px bg-hairline/60',
               ]}></div>
             </div>
           ))}
-          <div id="compass-needle" class="absolute h-full w-full transition-transform duration-300 ease-out" style="transform: rotate(0deg)">
+
+          {/* Intercardinal labels */}
+          {[
+            { label: 'NE', angle: 45 },
+            { label: 'SE', angle: 135 },
+            { label: 'SW', angle: 225 },
+            { label: 'NW', angle: 315 },
+          ].map(({ label, angle }) => {
+            const rad = (angle - 90) * (Math.PI / 180);
+            const r = 128;
+            return (
+              <span
+                class="absolute text-[9px] font-mono text-mute"
+                style={{
+                  left: `calc(50% + ${r * Math.cos(rad)}px)`,
+                  top: `calc(50% + ${r * Math.sin(rad)}px)`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                {label}
+              </span>
+            );
+          })}
+
+          {/* Compass Needle */}
+          <div id="compass-needle" class="absolute h-full w-full will-change-transform" style="transform: rotate(0deg)">
+            {/* North (Red) */}
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-              <div class="h-0 w-0 border-l-[6px] border-r-[6px] border-b-[120px] border-l-transparent border-r-transparent border-b-error"></div>
+              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error transition-colors duration-300"></div>
             </div>
+            {/* South (Gray) */}
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
-              <div class="h-0 w-0 border-l-[6px] border-r-[6px] border-t-[120px] border-l-transparent border-r-transparent border-t-hairline-strong"></div>
+              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[110px] border-l-transparent border-r-transparent border-t-hairline-strong transition-colors duration-300"></div>
             </div>
           </div>
-          <div class="absolute h-3 w-3 rounded-full bg-ink shadow-card"></div>
+
+          {/* Center Dot */}
+          <div id="compass-center" class="absolute h-3 w-3 rounded-full bg-ink shadow-card transition-colors duration-300"></div>
+
+          {/* North Indicator (subtle glow when near north) */}
+          <div id="north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.12) 0%, transparent 30%)"></div>
         </div>
 
         {/* Degree Display */}
         <div class="text-center">
-          <div class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">
-            <span id="compass-degrees">0</span><span class="text-2xl text-mute">°</span>
+          <div class="flex items-baseline justify-center gap-1">
+            <span id="compass-degrees" class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums transition-colors duration-300">0</span>
+            <span class="text-2xl text-mute">°</span>
           </div>
-          <div id="compass-direction" class="mt-2 text-sm font-medium text-body">North</div>
+          <div id="compass-direction" class="mt-1.5 text-sm font-medium text-body transition-colors duration-300">North</div>
         </div>
 
         {/* Status / Error */}
@@ -79,6 +135,58 @@ import SensorStatus from '../components/SensorStatus.astro';
       </div>
     </div>
   </section>
+
+  {/* Fullscreen Compass Overlay */}
+  <div id="compass-fullscreen" class="compass-fullscreen">
+    <div class="mb-4 flex w-full max-w-md items-center justify-between">
+      <div>
+        <div class="text-sm font-semibold text-ink">Compass</div>
+        <div class="text-xs text-body" id="fs-direction-full">North</div>
+      </div>
+      <button
+        id="fullscreen-close"
+        class="flex h-8 w-8 items-center justify-center rounded-full border border-hairline bg-canvas text-body transition-colors hover:bg-canvas-soft-2 hover:text-ink"
+        aria-label="Exit fullscreen"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="relative flex h-[min(80vw,380px)] w-[min(80vw,380px)] items-center justify-center rounded-full bg-canvas shadow-elevated">
+      <div class="absolute inset-4 rounded-full border border-hairline"></div>
+      <span class="absolute top-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-ink">N</span>
+      <span class="absolute bottom-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-mute">S</span>
+      <span class="absolute top-1/2 left-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">W</span>
+      <span class="absolute top-1/2 right-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">E</span>
+      {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
+        <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
+          <div class:list={[
+            'mx-auto',
+            deg % 90 === 0 ? 'h-3 w-[2px] bg-ink' : deg % 30 === 0 ? 'h-2.5 w-px bg-hairline-strong' : 'h-1.5 w-px bg-hairline/60',
+          ]}></div>
+        </div>
+      ))}
+      <div id="fs-needle" class="absolute h-full w-full will-change-transform" style="transform: rotate(0deg)">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
+          <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error"></div>
+        </div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
+          <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[110px] border-l-transparent border-r-transparent border-t-hairline-strong"></div>
+        </div>
+      </div>
+      <div class="absolute h-3 w-3 rounded-full bg-ink shadow-card"></div>
+      <div id="fs-north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.12) 0%, transparent 30%)"></div>
+    </div>
+
+    <div class="mt-6 text-center">
+      <div class="flex items-baseline justify-center gap-1">
+        <span id="fs-degrees" class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">0</span>
+        <span class="text-2xl text-mute">°</span>
+      </div>
+    </div>
+  </div>
 
   {/* Permission Modal */}
   <div
@@ -124,11 +232,22 @@ import SensorStatus from '../components/SensorStatus.astro';
 </Layout>
 
 <script>
+  // DOM elements
   const needle = document.getElementById('compass-needle');
   const degreesEl = document.getElementById('compass-degrees');
   const directionEl = document.getElementById('compass-direction');
   const messageEl = document.getElementById('compass-message');
   const statusEl = document.getElementById('compass-sensor-status');
+  const calibrationMsg = document.getElementById('calibration-msg');
+  const northGlow = document.getElementById('north-glow');
+  const compassContainer = document.getElementById('compass-container');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  const fullscreenOverlay = document.getElementById('compass-fullscreen');
+  const fullscreenClose = document.getElementById('fullscreen-close');
+  const fsNeedle = document.getElementById('fs-needle');
+  const fsDegrees = document.getElementById('fs-degrees');
+  const fsDirection = document.getElementById('fs-direction-full');
+  const fsNorthGlow = document.getElementById('fs-north-glow');
 
   const modal = document.getElementById('permission-modal')!;
   const modalEnable = document.getElementById('modal-enable')!;
@@ -138,7 +257,24 @@ import SensorStatus from '../components/SensorStatus.astro';
   const modalDenied = document.getElementById('modal-denied')!;
   const modalDeniedText = document.getElementById('modal-denied-text')!;
 
+  // State
   let isRunning = false;
+  let isFullscreen = false;
+  let currentHeading = 0;
+  let smoothedHeading = 0;
+  let lastRawHeading = 0;
+
+  // Smoothing config
+  const SMOOTHING_FACTOR = 0.15; // Low-pass filter (0 = no change, 1 = no smoothing)
+  const DEAD_ZONE = 1.5; // Ignore fluctuations below this (degrees)
+  const NORTH_THRESHOLD = 2; // North alignment feedback threshold
+
+  // Calibration tracking
+  let headingHistory: number[] = [];
+  let calibrationShown = false;
+  let calibrationHideTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // --- Helpers ---
 
   function showMessage(msg: string) {
     if (messageEl) {
@@ -191,35 +327,191 @@ import SensorStatus from '../components/SensorStatus.astro';
     modalDeniedText.textContent = msg;
   }
 
-  function getDirection(deg: number): string {
-    const directions = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West'];
-    return directions[Math.round(deg / 45) % 8];
+  function getCardinal(deg: number): string {
+    const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    return dirs[Math.round(deg / 45) % 8];
   }
 
+  function getDirectionName(deg: number): string {
+    const names = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West'];
+    return names[Math.round(deg / 45) % 8];
+  }
+
+  // --- Smooth Needle Logic ---
+
+  function shortestRotation(from: number, to: number): number {
+    let diff = to - from;
+    // Handle wrap-around: always rotate through the shortest path
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return diff;
+  }
+
+  function smoothHeading(raw: number): number {
+    const diff = shortestRotation(currentHeading, raw);
+
+    // Dead zone: ignore tiny fluctuations
+    if (Math.abs(diff) < DEAD_ZONE) {
+      return currentHeading;
+    }
+
+    // Low-pass filter
+    smoothedHeading = currentHeading + diff * SMOOTHING_FACTOR;
+
+    // Normalize to 0-360
+    smoothedHeading = ((smoothedHeading % 360) + 360) % 360;
+    currentHeading = smoothedHeading;
+    return smoothedHeading;
+  }
+
+  // --- Calibration Detection ---
+
+  function updateCalibration(heading: number) {
+    headingHistory.push(heading);
+    if (headingHistory.length > 30) headingHistory.shift();
+
+    if (headingHistory.length < 10) return;
+
+    // Calculate variance
+    const mean = headingHistory.reduce((a, b) => a + b, 0) / headingHistory.length;
+    const variance = headingHistory.reduce((sum, h) => sum + Math.pow(shortestRotation(mean, h), 2), 0) / headingHistory.length;
+
+    // High variance = unstable readings = needs calibration
+    if (variance > 100 && !calibrationShown) {
+      calibrationShown = true;
+      calibrationMsg?.classList.remove('hidden');
+      calibrationMsg?.classList.add('flex');
+    }
+
+    // Stable readings = hide calibration message
+    if (variance < 25 && calibrationShown) {
+      if (calibrationHideTimeout) clearTimeout(calibrationHideTimeout);
+      calibrationHideTimeout = setTimeout(() => {
+        calibrationMsg?.classList.add('hidden');
+        calibrationMsg?.classList.remove('flex');
+        calibrationShown = false;
+      }, 2000);
+    }
+  }
+
+  // --- North Alignment Feedback ---
+
+  function updateNorthFeedback(heading: number) {
+    const distFromNorth = Math.min(heading, 360 - heading);
+    const isNearNorth = distFromNorth <= NORTH_THRESHOLD;
+
+    if (northGlow) {
+      northGlow.style.opacity = isNearNorth ? '1' : '0';
+    }
+    if (fsNorthGlow) {
+      fsNorthGlow.style.opacity = isNearNorth ? '1' : '0';
+    }
+
+    // Subtle highlight on N label
+    const nLabel = compassContainer?.querySelector('.absolute.top-5');
+    if (nLabel) {
+      nLabel.classList.toggle('text-error', isNearNorth);
+      nLabel.classList.toggle('text-ink', !isNearNorth);
+    }
+  }
+
+  // --- Update Display ---
+
+  function updateDisplay(heading: number) {
+    const rounded = Math.round(heading);
+    const cardinal = getCardinal(heading);
+    const dirName = getDirectionName(heading);
+
+    // Main compass
+    if (needle) needle.style.transform = `rotate(${-heading}deg)`;
+    if (degreesEl) degreesEl.textContent = rounded.toString();
+    if (directionEl) directionEl.textContent = `${dirName} (${cardinal})`;
+
+    // Fullscreen compass
+    if (fsNeedle) fsNeedle.style.transform = `rotate(${-heading}deg)`;
+    if (fsDegrees) fsDegrees.textContent = rounded.toString();
+    if (fsDirection) fsDirection.textContent = dirName;
+
+    updateNorthFeedback(heading);
+  }
+
+  // --- Orientation Handler ---
+
   function handleOrientation(event: DeviceOrientationEvent) {
-    let heading: number | null = null;
+    let raw: number | null = null;
 
     if ('webkitCompassHeading' in event) {
-      heading = (event as any).webkitCompassHeading;
+      raw = (event as any).webkitCompassHeading;
     } else if (event.alpha !== null) {
-      heading = 360 - event.alpha;
+      raw = 360 - event.alpha;
     } else {
       return;
     }
 
-    if (heading === null || isNaN(heading)) return;
+    if (raw === null || isNaN(raw)) return;
 
     if (!isRunning) {
       isRunning = true;
+      currentHeading = raw;
+      smoothedHeading = raw;
       hideMessage();
       hideModal();
       setStatus('ready', 'Sensors ready');
     }
 
-    if (needle) needle.style.transform = `rotate(${-heading}deg)`;
-    if (degreesEl) degreesEl.textContent = Math.round(heading).toString();
-    if (directionEl) directionEl.textContent = getDirection(heading);
+    const smoothed = smoothHeading(raw);
+    updateDisplay(smoothed);
+    updateCalibration(smoothed);
   }
+
+  // --- Fullscreen ---
+
+  function enterFullscreen() {
+    fullscreenOverlay?.classList.add('active');
+    isFullscreen = true;
+    document.body.style.overflow = 'hidden';
+
+    // Try native fullscreen
+    const el = fullscreenOverlay as any;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    }
+  }
+
+  function exitFullscreen() {
+    fullscreenOverlay?.classList.remove('active');
+    isFullscreen = false;
+    document.body.style.overflow = '';
+
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+
+  fullscreenBtn?.addEventListener('click', enterFullscreen);
+  fullscreenClose?.addEventListener('click', exitFullscreen);
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && isFullscreen) {
+      exitFullscreen();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (isFullscreen) exitFullscreen();
+      else if (!modal.classList.contains('hidden')) {
+        hideModal();
+        setStatus('waiting', 'Permission needed');
+      }
+    }
+  });
+
+  // --- Permission ---
 
   async function requestPermission() {
     showModalLoading();
@@ -245,7 +537,6 @@ import SensorStatus from '../components/SensorStatus.astro';
         setStatus('error', 'Permission error');
       }
     } else if ('DeviceOrientationEvent' in window) {
-      // Android / desktop: listen directly
       window.addEventListener('deviceorientation', handleOrientation, true);
       hideModal();
       setStatus('ready', 'Listening…');
@@ -262,29 +553,28 @@ import SensorStatus from '../components/SensorStatus.astro';
     }
   }
 
+  // --- Init ---
+
   function init() {
-    // 1. Secure context check — sensors require HTTPS or localhost
     if (!window.isSecureContext) {
       setStatus('error', 'Insecure connection');
       showMessage('Compass access requires a secure HTTPS connection.');
       return;
     }
 
-    // 2. Check if DeviceOrientationEvent API exists
     if (!('DeviceOrientationEvent' in window)) {
       setStatus('error', 'Not supported');
       showMessage('Your device does not support compass sensors.');
       return;
     }
 
-    // 3. iOS 13+ with requestPermission — must show modal for user gesture
     if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
       setStatus('waiting', 'Permission needed');
       showModal();
       return;
     }
 
-    // 4. Android / desktop — try listening directly, events should fire on HTTPS
+    // Android / desktop: listen directly
     let gotData = false;
     const testHandler = (e: DeviceOrientationEvent) => {
       if (e.alpha !== null || ('webkitCompassHeading' in e)) {
@@ -296,7 +586,6 @@ import SensorStatus from '../components/SensorStatus.astro';
     };
     window.addEventListener('deviceorientation', testHandler, true);
 
-    // If no data after 2s on HTTPS, device likely has no sensors
     setTimeout(() => {
       if (!gotData && !isRunning) {
         setStatus('error', 'No sensors');
@@ -312,12 +601,6 @@ import SensorStatus from '../components/SensorStatus.astro';
   });
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
-      hideModal();
-      setStatus('waiting', 'Permission needed');
-    }
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
       hideModal();
       setStatus('waiting', 'Permission needed');
     }
