@@ -28,20 +28,18 @@ import SensorStatus from '../components/SensorStatus.astro';
       </div>
 
       <div class="flex flex-col items-center gap-6">
-        {/* Calibration Guidance */}
-        <div id="calibration-msg" class="hidden items-center gap-2 rounded-full bg-warning-soft px-4 py-2 text-xs font-medium text-warning-deep">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1v4M7 9v4M1 7h4M9 7h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-          </svg>
-          Move in a figure-8 to improve accuracy
+        {/* Sensor Accuracy Indicator */}
+        <div id="accuracy-badge" class="hidden items-center gap-1.5 rounded-full bg-canvas-soft-2 px-3 py-1 text-xs font-medium text-body">
+          <span id="accuracy-dot" class="h-1.5 w-1.5 rounded-full bg-success"></span>
+          <span id="accuracy-text">High accuracy</span>
         </div>
 
         {/* Compass Display */}
-        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center rounded-full bg-canvas shadow-elevated transition-all duration-300 sm:h-[380px] sm:w-[380px]">
+        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[380px] sm:w-[380px]">
           <div class="absolute inset-4 rounded-full border border-hairline"></div>
 
           {/* Cardinal Labels */}
-          <span class="absolute top-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-ink dark:text-ink">N</span>
+          <span class="absolute top-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-ink">N</span>
           <span class="absolute bottom-5 left-1/2 -translate-x-1/2 text-[11px] font-mono font-semibold text-mute">S</span>
           <span class="absolute top-1/2 left-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">W</span>
           <span class="absolute top-1/2 right-5 -translate-y-1/2 text-[11px] font-mono font-semibold text-mute">E</span>
@@ -80,19 +78,19 @@ import SensorStatus from '../components/SensorStatus.astro';
           })}
 
           {/* Compass Needle */}
-          <div id="compass-needle" class="absolute h-full w-full will-change-transform" style="transform: rotate(0deg)">
+          <div id="compass-needle" class="absolute h-full w-full" style="transform: rotate(0deg); transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);">
             {/* North (Red) */}
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error transition-colors duration-300"></div>
+              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error"></div>
             </div>
             {/* South (Gray) */}
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
-              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[110px] border-l-transparent border-r-transparent border-t-hairline-strong transition-colors duration-300"></div>
+              <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[110px] border-l-transparent border-r-transparent border-t-hairline-strong"></div>
             </div>
           </div>
 
           {/* Center Dot */}
-          <div id="compass-center" class="absolute h-3 w-3 rounded-full bg-ink shadow-card transition-colors duration-300"></div>
+          <div class="absolute h-3 w-3 rounded-full bg-ink shadow-card"></div>
 
           {/* North Indicator (subtle glow when near north) */}
           <div id="north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.12) 0%, transparent 30%)"></div>
@@ -101,10 +99,10 @@ import SensorStatus from '../components/SensorStatus.astro';
         {/* Degree Display */}
         <div class="text-center">
           <div class="flex items-baseline justify-center gap-1">
-            <span id="compass-degrees" class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums transition-colors duration-300">0</span>
+            <span id="compass-degrees" class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">0</span>
             <span class="text-2xl text-mute">°</span>
           </div>
-          <div id="compass-direction" class="mt-1.5 text-sm font-medium text-body transition-colors duration-300">North</div>
+          <div id="compass-direction" class="mt-1.5 text-sm font-medium text-body">North</div>
         </div>
 
         {/* Status / Error */}
@@ -124,10 +122,6 @@ import SensorStatus from '../components/SensorStatus.astro';
             </li>
             <li class="flex items-start gap-2">
               <span class="mt-0.5 text-mute">3.</span>
-              Move in a figure-8 pattern if calibration is needed
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="mt-0.5 text-mute">4.</span>
               The red end of the needle points North
             </li>
           </ul>
@@ -168,7 +162,7 @@ import SensorStatus from '../components/SensorStatus.astro';
           ]}></div>
         </div>
       ))}
-      <div id="fs-needle" class="absolute h-full w-full will-change-transform" style="transform: rotate(0deg)">
+      <div id="fs-needle" class="absolute h-full w-full" style="transform: rotate(0deg); transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
           <div class="h-0 w-0 border-l-[5px] border-r-[5px] border-b-[110px] border-l-transparent border-r-transparent border-b-error"></div>
         </div>
@@ -238,7 +232,9 @@ import SensorStatus from '../components/SensorStatus.astro';
   const directionEl = document.getElementById('compass-direction');
   const messageEl = document.getElementById('compass-message');
   const statusEl = document.getElementById('compass-sensor-status');
-  const calibrationMsg = document.getElementById('calibration-msg');
+  const accuracyBadge = document.getElementById('accuracy-badge');
+  const accuracyDot = document.getElementById('accuracy-dot');
+  const accuracyText = document.getElementById('accuracy-text');
   const northGlow = document.getElementById('north-glow');
   const compassContainer = document.getElementById('compass-container');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
@@ -261,18 +257,11 @@ import SensorStatus from '../components/SensorStatus.astro';
   let isRunning = false;
   let isFullscreen = false;
   let currentHeading = 0;
-  let smoothedHeading = 0;
-  let lastRawHeading = 0;
 
   // Smoothing config
-  const SMOOTHING_FACTOR = 0.15; // Low-pass filter (0 = no change, 1 = no smoothing)
-  const DEAD_ZONE = 1.5; // Ignore fluctuations below this (degrees)
-  const NORTH_THRESHOLD = 2; // North alignment feedback threshold
-
-  // Calibration tracking
-  let headingHistory: number[] = [];
-  let calibrationShown = false;
-  let calibrationHideTimeout: ReturnType<typeof setTimeout> | null = null;
+  const SMOOTHING_FACTOR = 0.15;
+  const DEAD_ZONE = 1.5;
+  const NORTH_THRESHOLD = 2;
 
   // --- Helpers ---
 
@@ -297,6 +286,24 @@ import SensorStatus from '../components/SensorStatus.astro';
       </span>
       <span class="text-body">${message}</span>
     `;
+  }
+
+  function showAccuracy(accuracy: number) {
+    if (!accuracyBadge) return;
+    accuracyBadge.classList.remove('hidden');
+    accuracyBadge.classList.add('flex');
+
+    // accuracy: 1 = low, 2 = medium, 3 = high (iOS), or estimate from heading variance
+    if (accuracy >= 3 || accuracy > 2.5) {
+      if (accuracyDot) accuracyDot.className = 'h-1.5 w-1.5 rounded-full bg-success';
+      if (accuracyText) accuracyText.textContent = 'High accuracy';
+    } else if (accuracy >= 2 || accuracy > 1.5) {
+      if (accuracyDot) accuracyDot.className = 'h-1.5 w-1.5 rounded-full bg-warning';
+      if (accuracyText) accuracyText.textContent = 'Medium accuracy';
+    } else {
+      if (accuracyDot) accuracyDot.className = 'h-1.5 w-1.5 rounded-full bg-error';
+      if (accuracyText) accuracyText.textContent = 'Low accuracy — calibrate';
+    }
   }
 
   function showModal() {
@@ -341,7 +348,6 @@ import SensorStatus from '../components/SensorStatus.astro';
 
   function shortestRotation(from: number, to: number): number {
     let diff = to - from;
-    // Handle wrap-around: always rotate through the shortest path
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
     return diff;
@@ -350,48 +356,13 @@ import SensorStatus from '../components/SensorStatus.astro';
   function smoothHeading(raw: number): number {
     const diff = shortestRotation(currentHeading, raw);
 
-    // Dead zone: ignore tiny fluctuations
     if (Math.abs(diff) < DEAD_ZONE) {
       return currentHeading;
     }
 
-    // Low-pass filter
-    smoothedHeading = currentHeading + diff * SMOOTHING_FACTOR;
-
-    // Normalize to 0-360
-    smoothedHeading = ((smoothedHeading % 360) + 360) % 360;
-    currentHeading = smoothedHeading;
-    return smoothedHeading;
-  }
-
-  // --- Calibration Detection ---
-
-  function updateCalibration(heading: number) {
-    headingHistory.push(heading);
-    if (headingHistory.length > 30) headingHistory.shift();
-
-    if (headingHistory.length < 10) return;
-
-    // Calculate variance
-    const mean = headingHistory.reduce((a, b) => a + b, 0) / headingHistory.length;
-    const variance = headingHistory.reduce((sum, h) => sum + Math.pow(shortestRotation(mean, h), 2), 0) / headingHistory.length;
-
-    // High variance = unstable readings = needs calibration
-    if (variance > 100 && !calibrationShown) {
-      calibrationShown = true;
-      calibrationMsg?.classList.remove('hidden');
-      calibrationMsg?.classList.add('flex');
-    }
-
-    // Stable readings = hide calibration message
-    if (variance < 25 && calibrationShown) {
-      if (calibrationHideTimeout) clearTimeout(calibrationHideTimeout);
-      calibrationHideTimeout = setTimeout(() => {
-        calibrationMsg?.classList.add('hidden');
-        calibrationMsg?.classList.remove('flex');
-        calibrationShown = false;
-      }, 2000);
-    }
+    const smoothed = currentHeading + diff * SMOOTHING_FACTOR;
+    currentHeading = ((smoothed % 360) + 360) % 360;
+    return currentHeading;
   }
 
   // --- North Alignment Feedback ---
@@ -400,14 +371,9 @@ import SensorStatus from '../components/SensorStatus.astro';
     const distFromNorth = Math.min(heading, 360 - heading);
     const isNearNorth = distFromNorth <= NORTH_THRESHOLD;
 
-    if (northGlow) {
-      northGlow.style.opacity = isNearNorth ? '1' : '0';
-    }
-    if (fsNorthGlow) {
-      fsNorthGlow.style.opacity = isNearNorth ? '1' : '0';
-    }
+    if (northGlow) northGlow.style.opacity = isNearNorth ? '1' : '0';
+    if (fsNorthGlow) fsNorthGlow.style.opacity = isNearNorth ? '1' : '0';
 
-    // Subtle highlight on N label
     const nLabel = compassContainer?.querySelector('.absolute.top-5');
     if (nLabel) {
       nLabel.classList.toggle('text-error', isNearNorth);
@@ -422,12 +388,10 @@ import SensorStatus from '../components/SensorStatus.astro';
     const cardinal = getCardinal(heading);
     const dirName = getDirectionName(heading);
 
-    // Main compass
     if (needle) needle.style.transform = `rotate(${-heading}deg)`;
     if (degreesEl) degreesEl.textContent = rounded.toString();
     if (directionEl) directionEl.textContent = `${dirName} (${cardinal})`;
 
-    // Fullscreen compass
     if (fsNeedle) fsNeedle.style.transform = `rotate(${-heading}deg)`;
     if (fsDegrees) fsDegrees.textContent = rounded.toString();
     if (fsDirection) fsDirection.textContent = dirName;
@@ -437,23 +401,42 @@ import SensorStatus from '../components/SensorStatus.astro';
 
   // --- Orientation Handler ---
 
+  // Best sensor source priority:
+  // 1. DeviceOrientationEvent.webkitCompassHeading (iOS — magnetic north, tilt-compensated)
+  // 2. deviceorientation.absolute (Android — absolute orientation)
+  // 3. deviceorientation (Android — relative, needs manual calculation)
+
   function handleOrientation(event: DeviceOrientationEvent) {
     let raw: number | null = null;
+    let accuracy = 3; // default high
 
+    // iOS: webkitCompassHeading is already magnetic heading (0-360 from north)
+    // This is the BEST source — already tilt-compensated and absolute
     if ('webkitCompassHeading' in event) {
       raw = (event as any).webkitCompassHeading;
+      accuracy = (event as any).webkitCompassAccuracy ?? 3;
     } else if (event.alpha !== null) {
-      raw = 360 - event.alpha;
-    } else {
-      return;
+      // Android: alpha is the rotation around the z-axis
+      // When event.absolute is true, alpha is relative to magnetic north
+      // Heading = 360 - alpha (to get clockwise from north)
+      if (event.absolute) {
+        raw = 360 - event.alpha;
+      } else {
+        // Relative orientation — alpha is device-relative, not absolute
+        // This is less accurate but still usable
+        raw = 360 - event.alpha;
+        accuracy = 2; // medium accuracy for relative
+      }
     }
 
     if (raw === null || isNaN(raw)) return;
 
+    // Normalize to 0-360
+    raw = ((raw % 360) + 360) % 360;
+
     if (!isRunning) {
       isRunning = true;
       currentHeading = raw;
-      smoothedHeading = raw;
       hideMessage();
       hideModal();
       setStatus('ready', 'Sensors ready');
@@ -461,7 +444,7 @@ import SensorStatus from '../components/SensorStatus.astro';
 
     const smoothed = smoothHeading(raw);
     updateDisplay(smoothed);
-    updateCalibration(smoothed);
+    showAccuracy(accuracy);
   }
 
   // --- Fullscreen ---
@@ -471,7 +454,6 @@ import SensorStatus from '../components/SensorStatus.astro';
     isFullscreen = true;
     document.body.style.overflow = 'hidden';
 
-    // Try native fullscreen
     const el = fullscreenOverlay as any;
     if (el.requestFullscreen) {
       el.requestFullscreen().catch(() => {});
@@ -574,7 +556,6 @@ import SensorStatus from '../components/SensorStatus.astro';
       return;
     }
 
-    // Android / desktop: listen directly
     let gotData = false;
     const testHandler = (e: DeviceOrientationEvent) => {
       if (e.alpha !== null || ('webkitCompassHeading' in e)) {

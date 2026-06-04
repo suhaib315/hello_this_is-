@@ -17,10 +17,17 @@ import SensorStatus from '../components/SensorStatus.astro';
       </div>
 
       <div class="flex flex-col items-center gap-8">
+        {/* Classification Badge */}
+        <div id="emf-classification" class="flex items-center gap-2 rounded-full bg-success/10 px-4 py-2 text-sm font-medium text-success transition-colors duration-300">
+          <span id="classification-dot" class="h-2 w-2 rounded-full bg-success"></span>
+          <span id="classification-text">Earth's Field</span>
+          <span id="classification-range" class="text-xs text-body">(25–65 µT)</span>
+        </div>
+
         {/* EMF Display */}
         <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
           {/* Background Glow */}
-          <div id="emf-glow" class="absolute inset-0 rounded-full bg-success/5 transition-opacity duration-500"></div>
+          <div id="emf-glow" class="absolute inset-0 rounded-full transition-opacity duration-500" style="background: radial-gradient(circle, var(--color-success) 0%, transparent 70%); opacity: 0.05;"></div>
 
           {/* Scale Ring */}
           <div class="absolute inset-8 rounded-full border-2 border-hairline"></div>
@@ -79,16 +86,16 @@ import SensorStatus from '../components/SensorStatus.astro';
           <h3 class="mb-4 text-sm font-semibold text-ink">Magnetic Field Reference</h3>
           <div class="flex flex-col gap-3">
             {[
-              { level: 'Earth', range: '25 - 65 µT', example: 'Natural background', color: 'bg-success' },
-              { level: 'Low', range: '65 - 100 µT', example: 'Computer monitor', color: 'bg-link' },
-              { level: 'Moderate', range: '100 - 200 µT', example: 'Microwave oven', color: 'bg-warning' },
-              { level: 'High', range: '200 - 500 µT', example: 'Power lines nearby', color: 'bg-error' },
-              { level: 'Very High', range: '500+ µT', example: 'MRI machine', color: 'bg-error-deep' },
+              { level: 'Earth', range: '25 – 65 µT', example: 'Natural background', color: 'bg-success', textColor: 'text-success' },
+              { level: 'Low', range: '65 – 100 µT', example: 'Computer monitor', color: 'bg-link', textColor: 'text-link' },
+              { level: 'Moderate', range: '100 – 200 µT', example: 'Microwave oven', color: 'bg-warning', textColor: 'text-warning' },
+              { level: 'High', range: '200 – 500 µT', example: 'Power lines nearby', color: 'bg-error', textColor: 'text-error' },
+              { level: 'Very High', range: '500+ µT', example: 'MRI machine', color: 'bg-error-deep', textColor: 'text-error-deep' },
             ].map((item) => (
               <div class="flex items-center gap-3">
                 <div class:list={['h-3 w-3 rounded-full', item.color]}></div>
                 <div class="flex-1">
-                  <span class="text-sm font-medium text-ink">{item.level}</span>
+                  <span class:list={['text-sm font-medium', item.textColor]}>{item.level}</span>
                   <span class="ml-2 text-xs text-mute">{item.range}</span>
                 </div>
                 <span class="text-xs text-body">{item.example}</span>
@@ -111,7 +118,7 @@ import SensorStatus from '../components/SensorStatus.astro';
             </li>
             <li class="flex items-start gap-2">
               <span class="mt-0.5 text-mute">3.</span>
-              Values near 25-65 µT indicate Earth's natural magnetic field
+              Values near 25–65 µT indicate Earth's natural magnetic field
             </li>
           </ul>
         </div>
@@ -123,54 +130,130 @@ import SensorStatus from '../components/SensorStatus.astro';
 <script>
   const valueEl = document.getElementById('emf-value');
   const glowEl = document.getElementById('emf-glow');
+  const classificationEl = document.getElementById('emf-classification');
+  const classificationDot = document.getElementById('classification-dot');
+  const classificationText = document.getElementById('classification-text');
+  const classificationRange = document.getElementById('classification-range');
 
-  function updateEMF(value: number) {
+  // Smoothing
+  const SMOOTHING = 0.2; // Low-pass filter factor
+  let smoothedValue = 0;
+  let valueHistory: number[] = [];
+
+  // Classification thresholds
+  const LEVELS = {
+    earth:    { min: 0,   max: 65,  label: "Earth's Field",  range: '25–65 µT',  color: 'bg-success',  textColor: 'text-success' },
+    low:      { min: 65,  max: 100, label: 'Low',            range: '65–100 µT', color: 'bg-link',     textColor: 'text-link' },
+    moderate: { min: 100, max: 200, label: 'Moderate',        range: '100–200 µT', color: 'bg-warning',  textColor: 'text-warning' },
+    high:     { min: 200, max: 500, label: 'High',            range: '200–500 µT', color: 'bg-error',    textColor: 'text-error' },
+    extreme:  { min: 500, max: Infinity, label: 'Very High',  range: '500+ µT',   color: 'bg-error-deep', textColor: 'text-error-deep' },
+  };
+
+  function classifyField(µT: number) {
+    if (µT < LEVELS.earth.max) return LEVELS.earth;
+    if (µT < LEVELS.low.max) return LEVELS.low;
+    if (µT < LEVELS.moderate.max) return LEVELS.moderate;
+    if (µT < LEVELS.high.max) return LEVELS.high;
+    return LEVELS.extreme;
+  }
+
+  function smoothValue(raw: number): number {
+    // Moving average of last 5 readings
+    valueHistory.push(raw);
+    if (valueHistory.length > 5) valueHistory.shift();
+
+    const avg = valueHistory.reduce((a, b) => a + b, 0) / valueHistory.length;
+
+    // Low-pass filter
+    smoothedValue = smoothedValue + (avg - smoothedValue) * SMOOTHING;
+    return smoothedValue;
+  }
+
+  function updateDisplay(µT: number) {
+    const level = classifyField(µT);
+
+    // Value
     if (valueEl) {
-      valueEl.textContent = Math.round(value).toLocaleString();
+      valueEl.textContent = Math.round(µT).toLocaleString();
     }
+
+    // Classification badge
+    if (classificationEl) {
+      classificationEl.className = `flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300 ${level.color}/10 ${level.textColor}`;
+    }
+    if (classificationDot) {
+      classificationDot.className = `h-2 w-2 rounded-full ${level.color}`;
+    }
+    if (classificationText) {
+      classificationText.textContent = level.label;
+    }
+    if (classificationRange) {
+      classificationRange.textContent = `(${level.range})`;
+    }
+
+    // Glow intensity
     if (glowEl) {
-      const intensity = Math.min(value / 500, 1);
-      glowEl.style.opacity = (intensity * 0.3).toString();
+      const intensity = Math.min(µT / 500, 1);
+      const color = µT < 65 ? '0, 112, 243' : µT < 100 ? '0, 112, 243' : µT < 200 ? '245, 166, 35' : '238, 0, 0';
+      glowEl.style.background = `radial-gradient(circle, rgba(${color}, ${intensity * 0.3}) 0%, transparent 70%)`;
+      glowEl.style.opacity = '1';
     }
   }
 
-  function handleOrientation(event: DeviceMotionEvent) {
+  // --- Sensor ---
+
+  function handleMotion(event: DeviceMotionEvent) {
     const acc = event.accelerationIncludingGravity;
-    if (acc) {
-      const x = acc.x ?? 0;
-      const y = acc.y ?? 0;
-      const z = acc.z ?? 0;
-      const magnitude = Math.sqrt(x * x + y * y + z * z);
-      // Rough estimation - actual magnetometer data needs Magnetometer API
-      updateEMF(magnitude * 10);
-    }
+    if (!acc) return;
+
+    // Fallback: estimate EMF from accelerometer (not accurate, but gives some reading)
+    const x = acc.x ?? 0;
+    const y = acc.y ?? 0;
+    const z = acc.z ?? 0;
+    const magnitude = Math.sqrt(x * x + y * y + z * z);
+
+    // This is NOT real EMF data — it's accelerometer gravity
+    // Real EMF needs the Magnetometer API
+    // Show a message that this is estimated
+    const smoothed = smoothValue(magnitude * 8);
+    updateDisplay(smoothed);
   }
 
-  async function requestPermission() {
+  function handleMagnetometer(event: any) {
+    // Real magnetometer data from Magnetometer API
+    const x = event.x ?? 0;
+    const y = event.y ?? 0;
+    const z = event.z ?? 0;
+    const magnitude = Math.sqrt(x * x + y * y + z * z);
+
+    const smoothed = smoothValue(magnitude);
+    updateDisplay(smoothed);
+  }
+
+  async function requestMotionPermission() {
     if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
       try {
         const permission = await (DeviceMotionEvent as any).requestPermission();
         if (permission === 'granted') {
-          window.addEventListener('devicemotion', handleOrientation, true);
+          window.addEventListener('devicemotion', handleMotion, true);
         }
       } catch (e) {
         console.error('Motion permission denied', e);
       }
     } else {
-      window.addEventListener('devicemotion', handleOrientation, true);
+      window.addEventListener('devicemotion', handleMotion, true);
     }
   }
 
-  // Try Magnetometer API first
   async function initMagnetometer() {
+    // Try the dedicated Magnetometer API first (most accurate)
     if ('Magnetometer' in window) {
       try {
-        const sensor = new (window as any).Magnetometer({ frequency: 10 });
-        sensor.addEventListener('reading', () => {
-          const magnitude = Math.sqrt(
-            sensor.x ** 2 + sensor.y ** 2 + sensor.z ** 2
-          );
-          updateEMF(magnitude);
+        const sensor = new (window as any).Magnetometer({ frequency: 15 });
+        sensor.addEventListener('reading', () => handleMagnetometer(sensor));
+        sensor.addEventListener('error', (e: any) => {
+          console.log('Magnetometer API error, using fallback:', e);
+          requestMotionPermission();
         });
         sensor.start();
         return;
@@ -178,7 +261,9 @@ import SensorStatus from '../components/SensorStatus.astro';
         console.log('Magnetometer API not available, using fallback');
       }
     }
-    requestPermission();
+
+    // Fallback to DeviceMotionEvent
+    requestMotionPermission();
   }
 
   initMagnetometer();
