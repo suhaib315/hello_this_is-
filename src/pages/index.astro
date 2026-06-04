@@ -1,11 +1,174 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import ToolCard from '../components/ToolCard.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const tools = [
+  {
+    title: 'Compass',
+    description: 'Digital compass showing real-time direction relative to geographic cardinal points.',
+    href: '/compass',
+    icon: '🧭',
+  },
+  {
+    title: 'Spirit Level',
+    description: 'Bubble level to check if a surface is horizontal or vertical.',
+    href: '/spirit-level',
+    icon: '📐',
+  },
+  {
+    title: 'Inclinometer',
+    description: 'Measure angles of slope, elevation, or depression with precision.',
+    href: '/inclinometer',
+    icon: '📏',
+  },
+  {
+    title: 'Speedometer',
+    description: 'Real-time GPS speed tracking in km/h and MPH.',
+    href: '/speedometer',
+    icon: '⚡',
+  },
+  {
+    title: 'Light Meter',
+    description: 'Measure illuminance in lux using your device light sensor.',
+    href: '/light-meter',
+    icon: '💡',
+  },
+  {
+    title: 'EMF Meter',
+    description: 'Detect magnetic field strength in microtesla (µT).',
+    href: '/magnetometer',
+    icon: '🧲',
+  },
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Home">
+  {/* Hero Section */}
+  <section class="relative overflow-hidden bg-canvas-soft">
+    {/* Mesh Gradient Background */}
+    <div class="pointer-events-none absolute inset-0 opacity-60">
+      <div class="mesh-gradient absolute -top-32 left-1/2 h-[600px] w-[800px] -translate-x-1/2 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative mx-auto max-w-[1400px] px-6 pt-24 pb-32 text-center md:pt-32 md:pb-40">
+      <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-canvas px-4 py-1.5 text-xs font-mono uppercase tracking-wider text-body shadow-card">
+        <span class="relative flex h-1.5 w-1.5">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
+          <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-success"></span>
+        </span>
+        Free &middot; No download &middot; Works offline
+      </div>
+
+      <h1 class="mx-auto max-w-3xl text-4xl font-semibold tracking-tight text-ink md:text-[48px] md:leading-[48px] md:tracking-[-2.4px]">
+        Precision measurement tools in your browser.
+      </h1>
+
+      <p class="mx-auto mt-6 max-w-xl text-lg text-body leading-relaxed">
+        Professional-grade compass, spirit level, inclinometer, speedometer, light meter, and EMF meter. No app installation required.
+      </p>
+
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <a
+          href="/compass"
+          class="inline-flex h-12 items-center rounded-full bg-primary px-6 text-sm font-medium text-on-primary no-underline transition-colors hover:bg-ink/80"
+        >
+          Open Compass
+        </a>
+        <a
+          href="#tools"
+          class="inline-flex h-12 items-center rounded-full bg-canvas px-6 text-sm font-medium text-ink no-underline shadow-card transition-colors hover:bg-canvas-soft-2"
+        >
+          View all tools
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* Tools Grid */}
+  <section id="tools" class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-24">
+      <div class="mb-12 text-center">
+        <span class="mb-3 inline-block rounded-full bg-canvas-soft-2 px-3 py-1 text-xs font-mono uppercase tracking-wider text-mute">
+          Tool Suite
+        </span>
+        <h2 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+          Six instruments. One destination.
+        </h2>
+        <p class="mx-auto mt-4 max-w-lg text-body">
+          Each tool uses your device's built-in sensors to deliver accurate, real-time measurements.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {tools.map((tool) => (
+          <ToolCard {...tool} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* Features Band */}
+  <section class="bg-canvas">
+    <div class="mx-auto max-w-[1400px] px-6 py-24">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div class="flex flex-col gap-3 rounded-xl p-6">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas-soft-2">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-ink">Instant access</h3>
+          <p class="text-sm text-body leading-relaxed">
+            Open your browser, grant sensor permissions, and start measuring. Zero friction.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3 rounded-xl p-6">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas-soft-2">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5" />
+              <path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-ink">No installation</h3>
+          <p class="text-sm text-body leading-relaxed">
+            Progressive Web App technology. Works like a native app without the app store.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3 rounded-xl p-6">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas-soft-2">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 2a8 8 0 100 16 8 8 0 000-16z" stroke="currentColor" stroke-width="1.5" />
+              <path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-ink">Real-time data</h3>
+          <p class="text-sm text-body leading-relaxed">
+            Sensors update continuously. Get live readings the moment conditions change.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* CTA Band */}
+  <section class="bg-primary">
+    <div class="mx-auto max-w-[1400px] px-6 py-24 text-center">
+      <h2 class="text-2xl font-semibold tracking-tight text-on-primary md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+        Start measuring now.
+      </h2>
+      <p class="mx-auto mt-4 max-w-lg text-on-primary/70">
+        No sign-up. No tracking. Just precision tools ready when you are.
+      </p>
+      <div class="mt-8">
+        <a
+          href="/compass"
+          class="inline-flex h-12 items-center rounded-full bg-on-primary px-6 text-sm font-medium text-primary no-underline transition-opacity hover:opacity-90"
+        >
+          Open Compass
+        </a>
+      </div>
+    </div>
+  </section>
 </Layout>

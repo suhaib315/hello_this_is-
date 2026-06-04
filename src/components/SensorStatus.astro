@@ -1,0 +1,57 @@
+---
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<div id={id} class="flex items-center gap-2 rounded-full bg-canvas-soft px-3 py-1.5 text-xs font-medium">
+  <span class="relative flex h-2 w-2">
+    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-warning opacity-75"></span>
+    <span class="relative inline-flex h-2 w-2 rounded-full bg-warning"></span>
+  </span>
+  <span class="text-body">Checking sensors…</span>
+</div>
+
+<script define:vars={{ id }}>
+  window.__sensorStates = window.__sensorStates || {};
+  window.__sensorCallbacks = window.__sensorCallbacks || {};
+
+  function setSensorStatus(elementId, state, message) {
+    window.__sensorStates[elementId] = state;
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    const colors = { ready: 'bg-success', waiting: 'bg-warning', error: 'bg-error' };
+    const pinging = state === 'waiting';
+
+    el.innerHTML = `
+      <span class="relative flex h-2 w-2">
+        ${pinging ? `<span class="absolute inline-flex h-full w-full animate-ping rounded-full ${colors[state]} opacity-75"></span>` : ''}
+        <span class="relative inline-flex h-2 w-2 rounded-full ${colors[state]}"></span>
+      </span>
+      <span class="text-body">${message}</span>
+    `;
+  }
+
+  function onSensorReady(elementId, callback) {
+    window.__sensorCallbacks[elementId] = callback;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      if (!('DeviceOrientationEvent' in window) && !('DeviceMotionEvent' in window)) {
+        setSensorStatus(id, 'error', 'Sensors unavailable');
+        return;
+      }
+
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof (DeviceOrientationEvent).requestPermission === 'function') {
+        setSensorStatus(id, 'waiting', 'Tap to enable');
+      } else {
+        setSensorStatus(id, 'ready', 'Sensors ready');
+      }
+    }, 500);
+  });
+</script>

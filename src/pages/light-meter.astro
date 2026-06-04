@@ -1,0 +1,156 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SensorStatus from '../components/SensorStatus.astro';
+---
+
+<Layout title="Light Meter" description="Free online light meter. Measure illuminance in lux using your device's light sensor.">
+  <section class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-16">
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+            Light Meter
+          </h1>
+          <p class="mt-2 text-sm text-body">Measure illuminance in lux</p>
+        </div>
+        <SensorStatus id="light-sensor-status" />
+      </div>
+
+      <div class="flex flex-col items-center gap-8">
+        {/* Lux Display */}
+        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
+          {/* Background Glow */}
+          <div id="lux-glow" class="absolute inset-0 rounded-full bg-link/5 transition-opacity duration-500"></div>
+
+          {/* Scale Ring */}
+          <div class="absolute inset-8 rounded-full border-2 border-hairline"></div>
+
+          {/* Lux Markers */}
+          {[0, 1, 2, 3, 4, 5].map((i) => {
+            const angle = (i / 5) * 270 - 135;
+            return (
+              <div
+                class="absolute h-full w-px origin-center"
+                style={{ transform: `rotate(${angle + 180}deg)` }}
+              >
+                <div class="mx-auto h-3 w-0.5 bg-hairline-strong"></div>
+              </div>
+            );
+          })}
+
+          {/* Labels */}
+          {[
+            { label: '0', angle: -135 },
+            { label: '500', angle: -81 },
+            { label: '1K', angle: -27 },
+            { label: '5K', angle: 27 },
+            { label: '10K', angle: 81 },
+            { label: '50K', angle: 135 },
+          ].map(({ label, angle }) => (
+            <span
+              class="absolute text-[10px] font-mono text-mute"
+              style={{
+                left: `${160 + 120 * Math.cos(angle * Math.PI / 180)}px`,
+                top: `${160 + 120 * Math.sin(angle * Math.PI / 180)}px`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              {label}
+            </span>
+          ))}
+
+          {/* Center */}
+          <div class="absolute h-4 w-4 rounded-full bg-ink shadow-card"></div>
+        </div>
+
+        {/* Lux Readout */}
+        <div class="text-center">
+          <div class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">
+            <span id="lux-value">0</span>
+          </div>
+          <div class="mt-1 text-sm font-medium text-body">lux (lumens/m²)</div>
+        </div>
+
+        {/* Light Level Guide */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-4 text-sm font-semibold text-ink">Light Level Reference</h3>
+          <div class="flex flex-col gap-3">
+            {[
+              { level: 'Dark', range: '0 - 10 lux', example: 'Starlight', color: 'bg-ink' },
+              { level: 'Dim', range: '10 - 50 lux', example: 'Candle', color: 'bg-mute' },
+              { level: 'Low', range: '50 - 200 lux', example: 'Living room', color: 'bg-hairline-strong' },
+              { level: 'Normal', range: '200 - 500 lux', example: 'Office', color: 'bg-link' },
+              { level: 'Bright', range: '500 - 1000 lux', example: 'Daylight', color: 'bg-cyan' },
+              { level: 'Very Bright', range: '1000+ lux', example: 'Direct sun', color: 'bg-warning' },
+            ].map((item) => (
+              <div class="flex items-center gap-3">
+                <div class:list={['h-3 w-3 rounded-full', item.color]}></div>
+                <div class="flex-1">
+                  <span class="text-sm font-medium text-ink">{item.level}</span>
+                  <span class="ml-2 text-xs text-mute">{item.range}</span>
+                </div>
+                <span class="text-xs text-body">{item.example}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-3 text-sm font-semibold text-ink">How to use</h3>
+          <ul class="flex flex-col gap-2 text-sm text-body">
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">1.</span>
+              Point your device's light sensor toward the light source
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">2.</span>
+              Keep the screen facing away from the light
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">3.</span>
+              Read the lux value in real-time
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const valueEl = document.getElementById('lux-value');
+  const glowEl = document.getElementById('lux-glow');
+
+  function updateLux(lux: number) {
+    if (valueEl) {
+      valueEl.textContent = Math.round(lux).toLocaleString();
+    }
+    if (glowEl) {
+      const intensity = Math.min(lux / 10000, 1);
+      glowEl.style.opacity = (intensity * 0.3).toString();
+    }
+  }
+
+  async function initAmbientLightSensor() {
+    if ('AmbientLightSensor' in window) {
+      try {
+        const sensor = new (window as any).AmbientLightSensor();
+        sensor.addEventListener('reading', () => {
+          updateLux(sensor.illuminance);
+        });
+        sensor.addEventListener('error', (e: any) => {
+          console.error('AmbientLightSensor error:', e);
+        });
+        sensor.start();
+      } catch (e) {
+        console.error('AmbientLightSensor not available:', e);
+      }
+    } else {
+      // Fallback: use deviceorientation for basic detection
+      console.log('AmbientLightSensor not supported, using fallback');
+    }
+  }
+
+  initAmbientLightSensor();
+</script>

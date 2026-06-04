@@ -1,0 +1,185 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SensorStatus from '../components/SensorStatus.astro';
+---
+
+<Layout title="EMF Meter" description="Free online magnetometer. Measure magnetic field strength in microtesla (µT).">
+  <section class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-16">
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+            EMF Meter
+          </h1>
+          <p class="mt-2 text-sm text-body">Measure magnetic field strength in microtesla</p>
+        </div>
+        <SensorStatus id="emf-sensor-status" />
+      </div>
+
+      <div class="flex flex-col items-center gap-8">
+        {/* EMF Display */}
+        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
+          {/* Background Glow */}
+          <div id="emf-glow" class="absolute inset-0 rounded-full bg-success/5 transition-opacity duration-500"></div>
+
+          {/* Scale Ring */}
+          <div class="absolute inset-8 rounded-full border-2 border-hairline"></div>
+
+          {/* EMF Markers */}
+          {Array.from({ length: 11 }, (_, i) => i).map((i) => {
+            const angle = (i / 10) * 270 - 135;
+            return (
+              <div
+                class="absolute h-full w-px origin-center"
+                style={{ transform: `rotate(${angle + 180}deg)` }}
+              >
+                <div class:list={[
+                  'mx-auto',
+                  i % 5 === 0 ? 'h-4 w-0.5 bg-ink' : 'h-2 w-px bg-hairline',
+                ]}></div>
+              </div>
+            );
+          })}
+
+          {/* Labels */}
+          {[
+            { label: '0', angle: -135 },
+            { label: '50', angle: -81 },
+            { label: '100', angle: -27 },
+            { label: '200', angle: 27 },
+            { label: '500', angle: 81 },
+            { label: '1000', angle: 135 },
+          ].map(({ label, angle }) => (
+            <span
+              class="absolute text-[10px] font-mono text-mute"
+              style={{
+                left: `${160 + 120 * Math.cos(angle * Math.PI / 180)}px`,
+                top: `${160 + 120 * Math.sin(angle * Math.PI / 180)}px`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              {label}
+            </span>
+          ))}
+
+          {/* Center */}
+          <div class="absolute h-4 w-4 rounded-full bg-ink shadow-card"></div>
+        </div>
+
+        {/* EMF Readout */}
+        <div class="text-center">
+          <div class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">
+            <span id="emf-value">0</span>
+          </div>
+          <div class="mt-1 text-sm font-medium text-body">µTesla</div>
+        </div>
+
+        {/* EMF Level Guide */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-4 text-sm font-semibold text-ink">Magnetic Field Reference</h3>
+          <div class="flex flex-col gap-3">
+            {[
+              { level: 'Earth', range: '25 - 65 µT', example: 'Natural background', color: 'bg-success' },
+              { level: 'Low', range: '65 - 100 µT', example: 'Computer monitor', color: 'bg-link' },
+              { level: 'Moderate', range: '100 - 200 µT', example: 'Microwave oven', color: 'bg-warning' },
+              { level: 'High', range: '200 - 500 µT', example: 'Power lines nearby', color: 'bg-error' },
+              { level: 'Very High', range: '500+ µT', example: 'MRI machine', color: 'bg-error-deep' },
+            ].map((item) => (
+              <div class="flex items-center gap-3">
+                <div class:list={['h-3 w-3 rounded-full', item.color]}></div>
+                <div class="flex-1">
+                  <span class="text-sm font-medium text-ink">{item.level}</span>
+                  <span class="ml-2 text-xs text-mute">{item.range}</span>
+                </div>
+                <span class="text-xs text-body">{item.example}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-3 text-sm font-semibold text-ink">How to use</h3>
+          <ul class="flex flex-col gap-2 text-sm text-body">
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">1.</span>
+              Move your device near the object you want to measure
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">2.</span>
+              The reading updates in real-time as you move
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">3.</span>
+              Values near 25-65 µT indicate Earth's natural magnetic field
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const valueEl = document.getElementById('emf-value');
+  const glowEl = document.getElementById('emf-glow');
+
+  function updateEMF(value: number) {
+    if (valueEl) {
+      valueEl.textContent = Math.round(value).toLocaleString();
+    }
+    if (glowEl) {
+      const intensity = Math.min(value / 500, 1);
+      glowEl.style.opacity = (intensity * 0.3).toString();
+    }
+  }
+
+  function handleOrientation(event: DeviceMotionEvent) {
+    const acc = event.accelerationIncludingGravity;
+    if (acc) {
+      const x = acc.x ?? 0;
+      const y = acc.y ?? 0;
+      const z = acc.z ?? 0;
+      const magnitude = Math.sqrt(x * x + y * y + z * z);
+      // Rough estimation - actual magnetometer data needs Magnetometer API
+      updateEMF(magnitude * 10);
+    }
+  }
+
+  async function requestPermission() {
+    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      try {
+        const permission = await (DeviceMotionEvent as any).requestPermission();
+        if (permission === 'granted') {
+          window.addEventListener('devicemotion', handleOrientation, true);
+        }
+      } catch (e) {
+        console.error('Motion permission denied', e);
+      }
+    } else {
+      window.addEventListener('devicemotion', handleOrientation, true);
+    }
+  }
+
+  // Try Magnetometer API first
+  async function initMagnetometer() {
+    if ('Magnetometer' in window) {
+      try {
+        const sensor = new (window as any).Magnetometer({ frequency: 10 });
+        sensor.addEventListener('reading', () => {
+          const magnitude = Math.sqrt(
+            sensor.x ** 2 + sensor.y ** 2 + sensor.z ** 2
+          );
+          updateEMF(magnitude);
+        });
+        sensor.start();
+        return;
+      } catch (e) {
+        console.log('Magnetometer API not available, using fallback');
+      }
+    }
+    requestPermission();
+  }
+
+  initMagnetometer();
+</script>

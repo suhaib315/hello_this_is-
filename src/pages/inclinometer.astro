@@ -1,0 +1,141 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SensorStatus from '../components/SensorStatus.astro';
+---
+
+<Layout title="Inclinometer" description="Free online inclinometer. Measure angles of slope, elevation, or depression with precision.">
+  <section class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-16">
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+            Inclinometer
+          </h1>
+          <p class="mt-2 text-sm text-body">Measure angles of slope, elevation, or depression</p>
+        </div>
+        <SensorStatus id="inclinometer-sensor-status" />
+      </div>
+
+      <div class="flex flex-col items-center gap-8">
+        {/* Angle Display */}
+        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
+          {/* Degree Ring */}
+          <div class="absolute inset-8 rounded-full border-2 border-hairline"></div>
+
+          {/* Degree Markers */}
+          {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
+            <div
+              class="absolute h-full w-px origin-center"
+              style={{ transform: `rotate(${deg}deg)` }}
+            >
+              <div class:list={[
+                'mx-auto',
+                deg % 30 === 0 ? 'h-4 w-0.5 bg-ink' : deg % 15 === 0 ? 'h-3 w-px bg-hairline-strong' : 'h-2 w-px bg-hairline',
+              ]}></div>
+            </div>
+          ))}
+
+          {/* Degree Labels */}
+          {[0, 90, 180, 270].map((deg) => {
+            const radius = 130;
+            const rad = (deg - 90) * (Math.PI / 180);
+            const x = 160 + radius * Math.cos(rad);
+            const y = 160 + radius * Math.sin(rad);
+            return (
+              <span
+                class="absolute text-xs font-mono font-semibold text-ink"
+                style={{ left: `${x}px`, top: `${y}px`, transform: 'translate(-50%, -50%)' }}
+              >
+                {deg}°
+              </span>
+            );
+          })}
+
+          {/* Angle Needle */}
+          <div id="inclinometer-needle" class="absolute h-full w-full transition-transform duration-300 ease-out" style="transform: rotate(0deg)">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
+              <div class="h-0 w-0 border-l-[4px] border-r-[4px] border-b-[100px] border-l-transparent border-r-transparent border-b-link"></div>
+            </div>
+          </div>
+
+          {/* Center Dot */}
+          <div class="absolute h-4 w-4 rounded-full bg-ink shadow-card"></div>
+        </div>
+
+        {/* Angle Readout */}
+        <div class="text-center">
+          <div class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">
+            <span id="inclinometer-degrees">0</span><span class="text-2xl text-mute">°</span>
+          </div>
+          <div id="inclinometer-label" class="mt-2 text-sm font-medium text-body">Level</div>
+        </div>
+
+        {/* Instructions */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-3 text-sm font-semibold text-ink">How to use</h3>
+          <ul class="flex flex-col gap-2 text-sm text-body">
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">1.</span>
+              Hold your device along the surface to measure
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">2.</span>
+              Tilt the device to see the angle change in real-time
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">3.</span>
+              0° is level, 90° is vertical
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const needle = document.getElementById('inclinometer-needle');
+  const degreesEl = document.getElementById('inclinometer-degrees');
+  const labelEl = document.getElementById('inclinometer-label');
+
+  function getLabel(deg: number): string {
+    const absDeg = Math.abs(deg);
+    if (absDeg < 1) return 'Level';
+    if (absDeg < 45) return deg > 0 ? 'Inclined' : 'Declined';
+    if (absDeg === 45) return '45° Slope';
+    if (absDeg < 90) return deg > 0 ? 'Steep incline' : 'Steep decline';
+    return 'Vertical';
+  }
+
+  function handleOrientation(event: DeviceOrientationEvent) {
+    const beta = event.beta ?? 0;
+    const heading = Math.round(beta);
+
+    if (needle) {
+      needle.style.transform = `rotate(${beta}deg)`;
+    }
+    if (degreesEl) {
+      degreesEl.textContent = Math.abs(heading).toString();
+    }
+    if (labelEl) {
+      labelEl.textContent = getLabel(heading);
+    }
+  }
+
+  async function requestPermission() {
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const permission = await (DeviceOrientationEvent as any).requestPermission();
+        if (permission === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+        }
+      } catch (e) {
+        console.error('Orientation permission denied', e);
+      }
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    }
+  }
+
+  requestPermission();
+</script>

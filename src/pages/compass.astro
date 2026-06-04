@@ -1,0 +1,327 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SensorStatus from '../components/SensorStatus.astro';
+---
+
+<Layout title="Compass" description="Free online digital compass showing real-time direction. Works on any device with a magnetometer.">
+  <section class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-16">
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+            Compass
+          </h1>
+          <p class="mt-2 text-sm text-body">Digital compass showing real-time direction</p>
+        </div>
+        <SensorStatus id="compass-sensor-status" />
+      </div>
+
+      <div class="flex flex-col items-center gap-8">
+        {/* Compass Display */}
+        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
+          <div class="absolute inset-4 rounded-full border border-hairline"></div>
+          <span class="absolute top-6 left-1/2 -translate-x-1/2 text-xs font-mono font-semibold text-ink">N</span>
+          <span class="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs font-mono font-semibold text-ink">S</span>
+          <span class="absolute top-1/2 left-6 -translate-y-1/2 text-xs font-mono font-semibold text-ink">W</span>
+          <span class="absolute top-1/2 right-6 -translate-y-1/2 text-xs font-mono font-semibold text-ink">E</span>
+          {Array.from({ length: 36 }, (_, i) => i * 10).map((deg) => (
+            <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
+              <div class:list={[
+                'mx-auto bg-hairline',
+                deg % 90 === 0 ? 'h-4 w-0.5 bg-ink' : deg % 30 === 0 ? 'h-3 w-px' : 'h-2 w-px',
+              ]}></div>
+            </div>
+          ))}
+          <div id="compass-needle" class="absolute h-full w-full transition-transform duration-300 ease-out" style="transform: rotate(0deg)">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
+              <div class="h-0 w-0 border-l-[6px] border-r-[6px] border-b-[120px] border-l-transparent border-r-transparent border-b-error"></div>
+            </div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
+              <div class="h-0 w-0 border-l-[6px] border-r-[6px] border-t-[120px] border-l-transparent border-r-transparent border-t-hairline-strong"></div>
+            </div>
+          </div>
+          <div class="absolute h-3 w-3 rounded-full bg-ink shadow-card"></div>
+        </div>
+
+        {/* Degree Display */}
+        <div class="text-center">
+          <div class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">
+            <span id="compass-degrees">0</span><span class="text-2xl text-mute">°</span>
+          </div>
+          <div id="compass-direction" class="mt-2 text-sm font-medium text-body">North</div>
+        </div>
+
+        {/* Status / Error */}
+        <div id="compass-message" class="hidden max-w-md rounded-xl border border-error-soft bg-error-soft/30 px-4 py-3 text-sm text-error"></div>
+
+        {/* Instructions */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-3 text-sm font-semibold text-ink">How to use</h3>
+          <ul class="flex flex-col gap-2 text-sm text-body">
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">1.</span>
+              Grant sensor access when prompted
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">2.</span>
+              Hold your device flat, screen facing up
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">3.</span>
+              Move in a figure-8 pattern if calibration is needed
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">4.</span>
+              The red end of the needle points North
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Permission Modal */}
+  <div
+    id="permission-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/40 backdrop-blur-sm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+  >
+    <div class="mx-4 w-full max-w-sm rounded-2xl bg-canvas p-6 shadow-float">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-canvas-soft-2">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="11" stroke="currentColor" stroke-width="1.5" class="text-ink" />
+          <path d="M14 5v3M14 20v3M5 14h3M20 14h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="text-mute" />
+          <path d="M14 7l2 7-2-2-2 2 2-7z" fill="#ee0000" />
+          <path d="M14 21l-2-7 2 2 2-2-2 7z" fill="#a1a1a1" />
+        </svg>
+      </div>
+      <h2 id="modal-title" class="text-center text-base font-semibold text-ink">Enable Compass</h2>
+      <p class="mt-2 text-center text-sm text-body leading-relaxed">
+        This compass needs access to your device sensors to determine direction.
+      </p>
+      <div id="modal-loading" class="hidden mt-5 flex items-center justify-center gap-2 py-3">
+        <svg class="h-4 w-4 animate-spin text-body" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25" />
+          <path d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor" class="opacity-75" />
+        </svg>
+        <span class="text-sm text-body">Requesting access…</span>
+      </div>
+      <div id="modal-buttons" class="mt-5 flex gap-3">
+        <button id="modal-cancel" class="flex-1 h-10 rounded-full bg-canvas-soft-2 px-4 text-sm font-medium text-body transition-colors hover:bg-canvas-soft">
+          Cancel
+        </button>
+        <button id="modal-enable" class="flex-1 h-10 rounded-full bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-ink/80">
+          Enable Compass
+        </button>
+      </div>
+      <div id="modal-denied" class="hidden mt-4 rounded-lg bg-error-soft/30 p-3">
+        <p class="text-xs text-error leading-relaxed" id="modal-denied-text"></p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const needle = document.getElementById('compass-needle');
+  const degreesEl = document.getElementById('compass-degrees');
+  const directionEl = document.getElementById('compass-direction');
+  const messageEl = document.getElementById('compass-message');
+  const statusEl = document.getElementById('compass-sensor-status');
+
+  const modal = document.getElementById('permission-modal')!;
+  const modalEnable = document.getElementById('modal-enable')!;
+  const modalCancel = document.getElementById('modal-cancel')!;
+  const modalLoading = document.getElementById('modal-loading')!;
+  const modalButtons = document.getElementById('modal-buttons')!;
+  const modalDenied = document.getElementById('modal-denied')!;
+  const modalDeniedText = document.getElementById('modal-denied-text')!;
+
+  let isRunning = false;
+
+  function showMessage(msg: string) {
+    if (messageEl) {
+      messageEl.textContent = msg;
+      messageEl.classList.remove('hidden');
+    }
+  }
+
+  function hideMessage() {
+    messageEl?.classList.add('hidden');
+  }
+
+  function setStatus(state: 'ready' | 'waiting' | 'error', message: string) {
+    if (!statusEl) return;
+    const colors = { ready: 'bg-success', waiting: 'bg-warning', error: 'bg-error' };
+    statusEl.innerHTML = `
+      <span class="relative flex h-2 w-2">
+        ${state === 'waiting' ? `<span class="absolute inline-flex h-full w-full animate-ping rounded-full ${colors[state]} opacity-75"></span>` : ''}
+        <span class="relative inline-flex h-2 w-2 rounded-full ${colors[state]}"></span>
+      </span>
+      <span class="text-body">${message}</span>
+    `;
+  }
+
+  function showModal() {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modalLoading.classList.add('hidden');
+    modalButtons.classList.remove('hidden');
+    modalDenied.classList.add('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  function showModalLoading() {
+    modalLoading.classList.remove('hidden');
+    modalButtons.classList.add('hidden');
+    modalDenied.classList.add('hidden');
+  }
+
+  function showModalDenied(msg: string) {
+    modalLoading.classList.add('hidden');
+    modalButtons.classList.add('hidden');
+    modalDenied.classList.remove('hidden');
+    modalDeniedText.textContent = msg;
+  }
+
+  function getDirection(deg: number): string {
+    const directions = ['North', 'North-East', 'East', 'South-East', 'South', 'South-West', 'West', 'North-West'];
+    return directions[Math.round(deg / 45) % 8];
+  }
+
+  function handleOrientation(event: DeviceOrientationEvent) {
+    let heading: number | null = null;
+
+    if ('webkitCompassHeading' in event) {
+      heading = (event as any).webkitCompassHeading;
+    } else if (event.alpha !== null) {
+      heading = 360 - event.alpha;
+    } else {
+      return;
+    }
+
+    if (heading === null || isNaN(heading)) return;
+
+    if (!isRunning) {
+      isRunning = true;
+      hideMessage();
+      hideModal();
+      setStatus('ready', 'Sensors ready');
+    }
+
+    if (needle) needle.style.transform = `rotate(${-heading}deg)`;
+    if (degreesEl) degreesEl.textContent = Math.round(heading).toString();
+    if (directionEl) directionEl.textContent = getDirection(heading);
+  }
+
+  async function requestPermission() {
+    showModalLoading();
+
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const permission = await (DeviceOrientationEvent as any).requestPermission();
+        if (permission === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+          hideModal();
+          setStatus('ready', 'Sensors ready');
+        } else {
+          showModalDenied(
+            'Compass access was denied. To enable it:\n' +
+            '1. Open Settings → Safari\n' +
+            '2. Tap "Motion & Orientation Access"\n' +
+            '3. Enable it, then reload this page'
+          );
+          setStatus('error', 'Permission denied');
+        }
+      } catch (err: any) {
+        showModalDenied('Could not request compass access. Try reloading the page.');
+        setStatus('error', 'Permission error');
+      }
+    } else if ('DeviceOrientationEvent' in window) {
+      // Android / desktop: listen directly
+      window.addEventListener('deviceorientation', handleOrientation, true);
+      hideModal();
+      setStatus('ready', 'Listening…');
+
+      setTimeout(() => {
+        if (!isRunning) {
+          setStatus('error', 'No data');
+          showMessage('Your device does not support compass sensors.');
+        }
+      }, 2000);
+    } else {
+      showModalDenied('Your browser does not support device orientation sensors.');
+      setStatus('error', 'Not supported');
+    }
+  }
+
+  function init() {
+    // 1. Secure context check — sensors require HTTPS or localhost
+    if (!window.isSecureContext) {
+      setStatus('error', 'Insecure connection');
+      showMessage('Compass access requires a secure HTTPS connection.');
+      return;
+    }
+
+    // 2. Check if DeviceOrientationEvent API exists
+    if (!('DeviceOrientationEvent' in window)) {
+      setStatus('error', 'Not supported');
+      showMessage('Your device does not support compass sensors.');
+      return;
+    }
+
+    // 3. iOS 13+ with requestPermission — must show modal for user gesture
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      setStatus('waiting', 'Permission needed');
+      showModal();
+      return;
+    }
+
+    // 4. Android / desktop — try listening directly, events should fire on HTTPS
+    let gotData = false;
+    const testHandler = (e: DeviceOrientationEvent) => {
+      if (e.alpha !== null || ('webkitCompassHeading' in e)) {
+        gotData = true;
+        window.removeEventListener('deviceorientation', testHandler, true);
+        window.addEventListener('deviceorientation', handleOrientation, true);
+        setStatus('ready', 'Sensors ready');
+      }
+    };
+    window.addEventListener('deviceorientation', testHandler, true);
+
+    // If no data after 2s on HTTPS, device likely has no sensors
+    setTimeout(() => {
+      if (!gotData && !isRunning) {
+        setStatus('error', 'No sensors');
+        showMessage('Your device does not support compass sensors.');
+      }
+    }, 2000);
+  }
+
+  modalEnable.addEventListener('click', requestPermission);
+  modalCancel.addEventListener('click', () => {
+    hideModal();
+    setStatus('waiting', 'Permission needed');
+  });
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      hideModal();
+      setStatus('waiting', 'Permission needed');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      hideModal();
+      setStatus('waiting', 'Permission needed');
+    }
+  });
+
+  init();
+</script>

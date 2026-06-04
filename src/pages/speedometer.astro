@@ -1,0 +1,213 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SensorStatus from '../components/SensorStatus.astro';
+---
+
+<Layout title="Speedometer" description="Free online GPS speedometer. Track your speed in real-time without any app.">
+  <section class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-16">
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+            Speedometer
+          </h1>
+          <p class="mt-2 text-sm text-body">Real-time GPS speed tracking</p>
+        </div>
+        <SensorStatus id="speed-sensor-status" />
+      </div>
+
+      <div class="flex flex-col items-center gap-8">
+        {/* Speed Display */}
+        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[400px] sm:w-[400px]">
+          {/* Speed Ring */}
+          <div class="absolute inset-8 rounded-full border-2 border-hairline"></div>
+
+          {/* Speed Markers */}
+          {Array.from({ length: 22 }, (_, i) => i * 10).map((speed) => {
+            const angle = (speed / 220) * 270 - 135;
+            const rad = (angle - 90) * (Math.PI / 180);
+            const outerR = 150;
+            const innerR = 130;
+            return (
+              <g>
+                <div
+                  class="absolute h-full w-px origin-center"
+                  style={{ transform: `rotate(${angle + 180}deg)` }}
+                >
+                  <div class:list={[
+                    'mx-auto',
+                    speed % 40 === 0 ? 'h-4 w-0.5 bg-ink' : speed % 20 === 0 ? 'h-3 w-px bg-hairline-strong' : 'h-2 w-px bg-hairline',
+                  ]}></div>
+                </div>
+                {speed % 40 === 0 && (
+                  <span
+                    class="absolute text-xs font-mono font-semibold text-ink"
+                    style={{
+                      left: `${160 + 110 * Math.cos((angle) * Math.PI / 180)}px`,
+                      top: `${160 + 110 * Math.sin((angle) * Math.PI / 180)}px`,
+                      transform: 'translate(-50%, -50%)',
+                    }}
+                  >
+                    {speed}
+                  </span>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Speed Needle */}
+          <div id="speed-needle" class="absolute h-full w-full transition-transform duration-200 ease-out" style="transform: rotate(-135deg)">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
+              <div class="h-0 w-0 border-l-[3px] border-r-[3px] border-b-[100px] border-l-transparent border-r-transparent border-b-error"></div>
+            </div>
+          </div>
+
+          {/* Center Dot */}
+          <div class="absolute h-4 w-4 rounded-full bg-ink shadow-card"></div>
+        </div>
+
+        {/* Speed Readout */}
+        <div class="text-center">
+          <div class="font-mono text-5xl font-semibold tracking-tight text-ink tabular-nums">
+            <span id="speed-value">0</span>
+          </div>
+          <div class="mt-2 flex items-center justify-center gap-4">
+            <button
+              id="speed-unit-kmh"
+              class="rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-on-primary transition-colors"
+            >
+              km/h
+            </button>
+            <button
+              id="speed-unit-mph"
+              class="rounded-full bg-canvas-soft-2 px-4 py-1.5 text-xs font-medium text-body transition-colors"
+            >
+              MPH
+            </button>
+          </div>
+        </div>
+
+        {/* GPS Status */}
+        <div class="flex gap-4 text-center">
+          <div class="rounded-xl bg-canvas p-4 shadow-card">
+            <div class="font-mono text-lg font-semibold text-ink tabular-nums">
+              <span id="speed-lat">--</span>
+            </div>
+            <div class="text-xs text-mute">Latitude</div>
+          </div>
+          <div class="rounded-xl bg-canvas p-4 shadow-card">
+            <div class="font-mono text-lg font-semibold text-ink tabular-nums">
+              <span id="speed-lng">--</span>
+            </div>
+            <div class="text-xs text-mute">Longitude</div>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card">
+          <h3 class="mb-3 text-sm font-semibold text-ink">How to use</h3>
+          <ul class="flex flex-col gap-2 text-sm text-body">
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">1.</span>
+              Enable GPS/location services on your device
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">2.</span>
+              Grant location permission when prompted
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute">3.</span>
+              Move to see your real-time speed update
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const needle = document.getElementById('speed-needle');
+  const valueEl = document.getElementById('speed-value');
+  const latEl = document.getElementById('speed-lat');
+  const lngEl = document.getElementById('speed-lng');
+  const unitKmh = document.getElementById('speed-unit-kmh');
+  const unitMph = document.getElementById('speed-unit-mph');
+
+  let useKmh = true;
+  let lastPosition: GeolocationCoordinates | null = null;
+  let lastTime = 0;
+
+  function updateUI(speed: number, lat: number, lng: number) {
+    const displaySpeed = useKmh ? speed : speed * 0.621371;
+
+    if (valueEl) {
+      valueEl.textContent = Math.round(displaySpeed).toString();
+    }
+    if (latEl) {
+      latEl.textContent = lat.toFixed(6);
+    }
+    if (lngEl) {
+      lngEl.textContent = lng.toFixed(6);
+    }
+
+    // Rotate needle: -135deg at 0, +135deg at 220
+    const angle = -135 + (Math.min(speed, 220) / 220) * 270;
+    if (needle) {
+      needle.style.transform = `rotate(${angle}deg)`;
+    }
+  }
+
+  function handlePosition(position: GeolocationPosition) {
+    const coords = position.coords;
+    const currentTime = Date.now();
+
+    if (lastPosition && lastTime) {
+      const timeDelta = (currentTime - lastTime) / 1000;
+      const lat1 = lastPosition.latitude;
+      const lng1 = lastPosition.longitude;
+      const lat2 = coords.latitude;
+      const lng2 = coords.longitude;
+
+      // Haversine formula
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c * 1000; // meters
+
+      const speed = distance / timeDelta * 3.6; // km/h
+      updateUI(speed, coords.latitude, coords.longitude);
+    } else {
+      updateUI(0, coords.latitude, coords.longitude);
+    }
+
+    lastPosition = coords;
+    lastTime = currentTime;
+  }
+
+  function handleError(error: GeolocationPositionError) {
+    console.error('Geolocation error:', error.message);
+  }
+
+  if ('geolocation' in navigator) {
+    navigator.geolocation.watchPosition(handlePosition, handleError, {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 10000,
+    });
+  }
+
+  unitKmh?.addEventListener('click', () => {
+    useKmh = true;
+    unitKmh.className = 'rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-on-primary transition-colors';
+    unitMph!.className = 'rounded-full bg-canvas-soft-2 px-4 py-1.5 text-xs font-medium text-body transition-colors';
+  });
+
+  unitMph?.addEventListener('click', () => {
+    useKmh = false;
+    unitMph.className = 'rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-on-primary transition-colors';
+    unitKmh!.className = 'rounded-full bg-canvas-soft-2 px-4 py-1.5 text-xs font-medium text-body transition-colors';
+  });
+</script>
