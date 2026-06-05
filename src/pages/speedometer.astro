@@ -3,141 +3,246 @@ import Layout from '../layouts/Layout.astro';
 import SensorStatus from '../components/SensorStatus.astro';
 ---
 
-<Layout title="Speedometer" description="Digital speedometer showing real-time speed">
-  {/* Main background automatically switches between white (light mode) and zinc-950 (dark mode) */}
-  <section class="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 px-4 py-8">
-    <div class="mx-auto max-w-[1400px]">
-
-      {/* Header Area */}
-      <div class="mb-10 flex items-center justify-between">
+<Layout title="Speedometer" description="Free online GPS speedometer. Track your speed in real-time without any app.">
+  <section class="bg-canvas-soft min-h-screen">
+    <div class="mx-auto max-w-[1400px] px-6 py-16">
+      <div class="mb-8 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold tracking-tight">Speedometer</h1>
-          <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Digital speedometer showing real-time speed</p>
+          <h1 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+            Speedometer
+          </h1>
+          <p class="mt-2 text-sm text-body">Real-time GPS speed tracking</p>
         </div>
         <SensorStatus id="speed-sensor-status" />
       </div>
 
-      {/* Main Speedometer Dial Container */}
-      <div class="flex flex-col items-center justify-center gap-10 mt-10">
-        
-        {/* The Circular Dial */}
-        <div class="relative flex h-[320px] w-[320px] items-center justify-center rounded-full bg-zinc-50 dark:bg-zinc-900 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-          {/* Outer Ring */}
-          <div class="absolute inset-0 rounded-full border-[10px] border-zinc-200 dark:border-zinc-800"></div>
+      <div class="flex flex-col items-center gap-8">
+        {/* Gauge Outer Display Wrapper */}
+        <div id="gauge-container" class="relative flex h-[300px] w-[300px] items-center justify-center rounded-full bg-canvas shadow-elevated sm:h-[380px] sm:w-[380px] select-none">
           
-          {/* Red Accent Arc to give it a "Speedometer" look without green */}
-          <div class="absolute inset-0 rounded-full border-[10px] border-transparent border-t-red-600 border-r-red-600 opacity-90" style="transform: rotate(-45deg);"></div>
+          {/* Circular Track Background Line */}
+          <div class="absolute inset-[30px] rounded-full border border-hairline bg-canvas-soft/40"></div>
 
-          {/* Speed Number Display */}
-          <div class="text-center z-10 flex flex-col items-center">
-            <span id="speedValue" class="text-8xl font-bold tracking-tighter text-zinc-900 dark:text-white">0</span>
-            <span id="activeUnitLabel" class="mt-2 text-xl font-medium text-red-600">km/h</span>
+          {/* Speed Markers Layer */}
+          <div class="absolute inset-0 flex items-center justify-center">
+            {Array.from({ length: 23 }, (_, i) => i * 10).map((speed) => {
+              // Standard automotive 270-degree sweep centered around the top
+              const angle = (speed / 220) * 270 - 135;
+              return (
+                <div class="absolute h-full w-px top-0 left-1/2 -translate-x-1/2 origin-center" style={{ transform: `rotate(${angle}deg)` }}>
+                  {/* Tick Line */}
+                  <div class:list={[
+                    'mx-auto mt-[34px]',
+                    speed % 40 === 0 ? 'h-3.5 w-[2px] bg-ink' : speed % 20 === 0 ? 'h-2.5 w-px bg-body' : 'h-1.5 w-px bg-mute',
+                  ]}></div>
+                  
+                  {/* Numbers positioned via percentage-based distribution */}
+                  {speed % 40 === 0 && (
+                    <div 
+                      class="absolute left-1/2 -translate-x-1/2 text-[11px] font-mono font-bold text-body sm:text-[12px]"
+                      style={{ 
+                        top: '52px',
+                        transform: `translateX(-50%) rotate(${-angle}deg)` 
+                      }}
+                    >
+                      {speed}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Speed Needle Layer */}
+          <div id="speed-needle" class="absolute inset-0 z-10 transition-transform duration-300 ease-out" style="transform: rotate(-135deg)">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[90%]">
+              {/* Sleek Tapered Indicator Needle */}
+              <div class="w-1 h-28 bg-error rounded-full shadow-md sm:h-36"></div>
+            </div>
+          </div>
+
+          {/* Center Hub Overlay */}
+          <div class="absolute h-5 w-5 rounded-full bg-ink border border-canvas shadow z-20 sm:h-6 sm:w-6"></div>
+
+          {/* Core Digital Speed Readout Centered in Bottom Gap */}
+          <div class="absolute bottom-[20%] text-center z-20">
+            <div class="font-mono text-5xl font-bold tracking-tight text-ink tabular-nums leading-none">
+              <span id="speed-value">0</span>
+            </div>
+            <div id="active-unit-label" class="text-[10px] font-mono uppercase tracking-wider text-mute mt-1">KM/H</div>
           </div>
         </div>
 
-        {/* Unit Toggle Buttons */}
-        <div class="flex gap-4">
-          <button id="unitKmh" class="w-24 py-3 rounded-full font-bold transition-all bg-red-600 text-white shadow-lg hover:bg-red-700">
+        {/* Toggle Controls */}
+        <div class="flex items-center justify-center gap-3">
+          <button
+            id="speed-unit-kmh"
+            class="rounded-full bg-primary px-5 py-1.5 text-xs font-semibold text-on-primary shadow transition-all duration-200"
+          >
             km/h
           </button>
-          <button id="unitMph" class="w-24 py-3 rounded-full font-bold transition-all bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-300 dark:hover:bg-zinc-700">
-            mph
+          <button
+            id="speed-unit-mph"
+            class="rounded-full bg-canvas-soft-2 px-5 py-1.5 text-xs font-medium text-body transition-all duration-200"
+          >
+            MPH
           </button>
         </div>
 
+        {/* Informational Guidelines Card */}
+        <div class="w-full max-w-md rounded-xl bg-canvas p-6 shadow-card border border-hairline">
+          <h3 class="mb-3 text-sm font-semibold text-ink">How to use</h3>
+          <ul class="flex flex-col gap-2 text-sm text-body">
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute font-mono">1.</span>
+              Enable GPS/location services on your mobile device
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute font-mono">2.</span>
+              Grant high-accuracy permission when prompted
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="mt-0.5 text-mute font-mono">3.</span>
+              Move outdoors to ensure clean satellite connectivity
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 </Layout>
 
 <script>
-  // State variables
+  const needle = document.getElementById('speed-needle');
+  const valueEl = document.getElementById('speed-value');
+  const unitKmh = document.getElementById('speed-unit-kmh');
+  const unitMph = document.getElementById('speed-unit-mph');
+  const activeUnitLabel = document.getElementById('active-unit-label');
+  const statusEl = document.getElementById('speed-sensor-status');
+
   let useKmh = true;
-  let watchId = null;
+  let lastPosition: GeolocationCoordinates | null = null;
+  let lastTime = 0;
 
-  // DOM Elements
-  const speedValue = document.getElementById('speedValue');
-  const activeUnitLabel = document.getElementById('activeUnitLabel');
-  const unitKmh = document.getElementById('unitKmh');
-  const unitMph = document.getElementById('unitMph');
-  const sensorStatus = document.getElementById('speed-sensor-status');
-
-  // Active/Inactive Button Styling Classes
-  const activeBtnClass = "w-24 py-3 rounded-full font-bold transition-all bg-red-600 text-white shadow-lg hover:bg-red-700";
-  const inactiveBtnClass = "w-24 py-3 rounded-full font-bold transition-all bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-300 dark:hover:bg-zinc-700";
-
-  // Function to handle the sensor status text colors (strictly red and neutral/white, no green)
-  function setStatus(status:string, message:string) {
-    if (sensorStatus) {
-      sensorStatus.textContent = message;
-      if (status === 'error') {
-        sensorStatus.className = "text-red-600 font-medium";
-      } else if (status === 'waiting') {
-        sensorStatus.className = "text-zinc-500 dark:text-zinc-400";
-      } else {
-        sensorStatus.className = "text-zinc-900 dark:text-white font-medium"; 
-      }
-    }
+  function setStatus(state: 'ready' | 'waiting' | 'error', message: string) {
+    if (!statusEl) return;
+    const colors = { ready: 'bg-success', waiting: 'bg-warning', error: 'bg-error' };
+    statusEl.innerHTML = `
+      <span class="relative flex h-2 w-2">
+        ${state === 'waiting' ? `<span class="absolute inline-flex h-full w-full animate-ping rounded-full ${colors[state]} opacity-75"></span>` : ''}
+        <span class="relative inline-flex h-2 w-2 rounded-full ${colors[state]}"></span>
+      </span>
+      <span class="text-body text-xs">${message}</span>
+    `;
   }
 
-  // Geolocation Position Handler
-  function handlePosition(position:GeolocationPosition) {
-    setStatus('ready', 'Sensors ready');
+  function updateUI(speedKmh: number) {
+    // 1. Guard zero boundaries
+    const safeKmh = Math.max(0, speedKmh);
     
-    // The browser returns speed in meters per second (m/s)
-    let speedMetersPerSecond = position.coords.speed;
+    // 2. Compute displayed numerical value base
+    const displaySpeed = useKmh ? safeKmh : safeKmh * 0.621371;
 
-    // If device is stationary or doesn't support speed calculation, it might return null
-    if (speedMetersPerSecond === null) {
-      speedMetersPerSecond = 0;
+    if (valueEl) {
+      valueEl.textContent = Math.round(displaySpeed).toString();
     }
 
-    let displaySpeed = 0;
-    if (useKmh) {
-      displaySpeed = speedMetersPerSecond * 3.6; // Convert m/s to km/h
+    // 3. Compute structural dial index matching current units config
+    // This scales the needle correctly regardless of switching modes!
+    const dialValueTarget = useKmh ? safeKmh : safeKmh * 0.621371;
+    const angle = -135 + (Math.min(dialValueTarget, 220) / 220) * 270;
+    
+    if (needle) {
+      needle.style.transform = `rotate(${angle}deg)`;
+    }
+  }
+
+  function handlePosition(position: GeolocationPosition) {
+    setStatus('ready', 'GPS Active');
+    const coords = position.coords;
+    const currentTime = Date.now();
+
+    // Prefer high-accuracy physical hardware speed emitted by internal sensor chips
+    if (coords.speed !== null && coords.speed >= 0) {
+      const computedKmh = coords.speed * 3.6; // Convert m/s straight to km/h
+      updateUI(computedKmh);
+    } 
+    // Fallback calculation algorithm if hardware field drops null
+    else if (lastPosition && lastTime) {
+      const timeDelta = (currentTime - lastTime) / 1000;
+      if (timeDelta <= 0) return;
+
+      const lat1 = lastPosition.latitude;
+      const lng1 = lastPosition.longitude;
+      const lat2 = coords.latitude;
+      const lng2 = coords.longitude;
+
+      const R = 6371; // Earth radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c * 1000; // Conversion to meters
+
+      // Filter out low-level hardware drift inaccuracies when sitting completely still
+      if (distance < 1.5) {
+        updateUI(0);
+      } else {
+        const speed = (distance / timeDelta) * 3.6;
+        updateUI(speed);
+      }
     } else {
-      displaySpeed = speedMetersPerSecond * 2.23694; // Convert m/s to mph
+      updateUI(0);
     }
 
-    if (speedValue) {
-      speedValue.textContent = Math.round(displaySpeed).toString();
+    lastPosition = coords;
+    lastTime = currentTime;
+  }
+
+  function handleError(error: GeolocationPositionError) {
+    console.error('GPS tracking fault context:', error.message);
+    if (error.code === 1) {
+      setStatus('error', 'Location Access Denied');
+    } else {
+      setStatus('error', 'Signal Connection Lost');
     }
   }
 
-  // Geolocation Error Handler
-  function handleError(error:GeolocationPositionError) {
-    if (error.code === 1) setStatus('error', 'Location Denied');
-    else setStatus('error', 'Signal Lost');
-  }
-
-  // Initialize Geolocation Tracking
+  // Active hardware subscription loop initialization
   if ('geolocation' in navigator) {
-    setStatus('waiting', 'Acquiring lock...');
-    watchId = navigator.geolocation.watchPosition(handlePosition, handleError, {
-      enableHighAccuracy: true,
-      maximumAge: 0,
+    setStatus('waiting', 'Acquiring satellite lock…');
+    navigator.geolocation.watchPosition(handlePosition, handleError, {
+      enableHighAccuracy: true, // Demands premium onboard hardware tracking
+      maximumAge: 0,            // Erases browser cache dependencies entirely
       timeout: 12000,
     });
   } else {
-    setStatus('error', 'Unsupported');
+    setStatus('error', 'Hardware unsupported');
   }
 
-  // Unit Toggles with Button Style Swapping
+  // --- Dynamic Interface Control Listeners ---
   unitKmh?.addEventListener('click', () => {
-    if (useKmh) return; // Do nothing if already in km/h
+    if (useKmh) return;
     useKmh = true;
+    if (activeUnitLabel) activeUnitLabel.textContent = 'KM/H';
+    unitKmh.className = 'rounded-full bg-primary px-5 py-1.5 text-xs font-semibold text-on-primary shadow transition-all duration-200';
+    unitMph!.className = 'rounded-full bg-canvas-soft-2 px-5 py-1.5 text-xs font-medium text-body transition-all duration-200';
     
-    if (activeUnitLabel) activeUnitLabel.textContent = 'km/h';
-    if (unitKmh) unitKmh.className = activeBtnClass;
-    if (unitMph) unitMph.className = inactiveBtnClass;
+    if (lastPosition) {
+      // Force instant visual update sync across active context coordinate frame
+      updateUI(lastPosition.speed ? lastPosition.speed * 3.6 : 0);
+    }
   });
 
   unitMph?.addEventListener('click', () => {
-    if (!useKmh) return; // Do nothing if already in mph
+    if (!useKmh) return;
     useKmh = false;
+    if (activeUnitLabel) activeUnitLabel.textContent = 'MPH';
+    unitMph.className = 'rounded-full bg-primary px-5 py-1.5 text-xs font-semibold text-on-primary shadow transition-all duration-200';
+    unitKmh!.className = 'rounded-full bg-canvas-soft-2 px-5 py-1.5 text-xs font-medium text-body transition-all duration-200';
     
-    if (activeUnitLabel) activeUnitLabel.textContent = 'mph';
-    if (unitMph) unitMph.className = activeBtnClass;
-    if (unitKmh) unitKmh.className = inactiveBtnClass;
+    if (lastPosition) {
+      updateUI(lastPosition.speed ? lastPosition.speed * 3.6 : 0);
+    }
   });
 </script>
