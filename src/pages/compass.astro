@@ -28,21 +28,21 @@ import SensorStatus from '../components/SensorStatus.astro';
       </div>
 
       <div class="flex flex-col items-center gap-6">
-        {/* Compass Display */}
-        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center sm:h-[380px] sm:w-[380px]">
+        {/* Compass Display Container */}
+        <div id="compass-container" class="relative flex h-[300px] w-[300px] items-center justify-center sm:h-[380px] sm:w-[380px] select-none">
           {/* Outer Metallic Ring */}
-          <div class="compass-outer-ring absolute inset-0 rounded-full"></div>
+          <div class="compass-outer-ring absolute inset-0 rounded-full border border-hairline bg-canvas shadow-md"></div>
 
           {/* North Marker (red triangle at top of ring) */}
-          <div class="compass-north-marker absolute -top-0 left-1/2 h-0 w-0 -translate-x-1/2" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 14px solid #cc0000;"></div>
+          <div class="compass-north-marker absolute top-1 left-1/2 h-0 w-0 -translate-x-1/2 z-20" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 14px solid #cc0000;"></div>
 
           {/* Inner Compass Face */}
-          <div id="compass-face" class="compass-inner-face absolute inset-[12px] rounded-full sm:inset-[14px]">
+          <div id="compass-face" class="compass-inner-face absolute inset-0 rounded-full flex items-center justify-center">
             {/* Degree Markers */}
             {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
-              <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
+              <div class="absolute h-full w-px top-0 left-1/2 -translate-x-1/2 origin-center" style={{ transform: `rotate(${deg}deg)` }}>
                 <div class:list={[
-                  'mx-auto',
+                  'mx-auto mt-3',
                   deg % 90 === 0 ? 'h-4 w-[2px]' : deg % 30 === 0 ? 'h-3 w-[1.5px]' : deg % 15 === 0 ? 'h-2.5 w-px' : 'h-2 w-px',
                 ]} style={{
                   background: deg % 90 === 0
@@ -56,13 +56,13 @@ import SensorStatus from '../components/SensorStatus.astro';
               </div>
             ))}
 
-            {/* Cardinal Labels */}
-            <span class="compass-cardinal-label absolute top-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-error sm:text-[16px]">N</span>
-            <span class="compass-cardinal-label absolute bottom-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-ink sm:text-[16px]">S</span>
-            <span class="compass-cardinal-label absolute top-1/2 left-6 -translate-y-1/2 text-[14px] font-mono text-ink sm:text-[16px]">W</span>
-            <span class="compass-cardinal-label absolute top-1/2 right-6 -translate-y-1/2 text-[14px] font-mono text-ink sm:text-[16px]">E</span>
+            {/* Cardinal Labels - Safely tucked within relative spaces */}
+            <span class="compass-cardinal-label absolute top-8 left-1/2 -translate-x-1/2 text-[14px] font-mono font-bold text-error sm:text-[16px]">N</span>
+            <span class="compass-cardinal-label absolute bottom-8 left-1/2 -translate-x-1/2 text-[14px] font-mono font-bold text-ink sm:text-[16px]">S</span>
+            <span class="compass-cardinal-label absolute left-8 top-1/2 -translate-y-1/2 text-[14px] font-mono font-bold text-ink sm:text-[16px]">W</span>
+            <span class="compass-cardinal-label absolute right-8 top-1/2 -translate-y-1/2 text-[14px] font-mono font-bold text-ink sm:text-[16px]">E</span>
 
-            {/* Intercardinal Labels */}
+            {/* Intercardinal Labels - Switched to percentage radius for fluid scaling */}
             {[
               { label: 'NE', angle: 45 },
               { label: 'SE', angle: 135 },
@@ -70,13 +70,13 @@ import SensorStatus from '../components/SensorStatus.astro';
               { label: 'NW', angle: 315 },
             ].map(({ label, angle }) => {
               const rad = (angle - 90) * (Math.PI / 180);
-              const r = 110;
+              const radiusPercent = 28; // Dynamic scaling percentage
               return (
                 <span
                   class="compass-intercardinal-label absolute text-[10px] font-mono text-body sm:text-[11px]"
                   style={{
-                    left: `calc(50% + ${r * Math.cos(rad)}px)`,
-                    top: `calc(50% + ${r * Math.sin(rad)}px)`,
+                    left: `calc(50% + ${radiusPercent * Math.cos(rad)}%)`,
+                    top: `calc(50% + ${radiusPercent * Math.sin(rad)}%)`,
                     transform: 'translate(-50%, -50%)',
                   }}
                 >
@@ -86,23 +86,19 @@ import SensorStatus from '../components/SensorStatus.astro';
             })}
           </div>
 
-          {/* Compass Needle */}
-          <div id="compass-needle" class="absolute h-full w-full" style="transform: rotate(0deg);">
-            {/* North (Red) - Tapered diamond shape */}
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-              <div class="compass-needle-north" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 105px solid #cc0000;"></div>
-            </div>
-            {/* South (Dark) - Tapered diamond shape */}
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
-              <div class="compass-needle-south" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 105px solid #2d2d44;"></div>
-            </div>
+          {/* Compass Needle - This now handles visual rotation cleanly */}
+          <div id="compass-needle" class="absolute inset-0 z-10 transition-transform duration-75 ease-out" style="transform: rotate(0deg);">
+            {/* North (Red) */}
+            <div class="absolute bottom-1/2 left-1/2 -translate-x-1/2 h-[35%] w-3 bg-error rounded-t-full origin-bottom"></div>
+            {/* South (Dark) */}
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 h-[35%] w-3 bg-zinc-700 rounded-b-full origin-top"></div>
           </div>
 
           {/* Center Hub */}
-          <div class="compass-center-hub absolute h-5 w-5 rounded-full sm:h-6 sm:w-6"></div>
+          <div class="compass-center-hub absolute h-5 w-5 rounded-full bg-canvas shadow border border-hairline z-20 sm:h-6 sm:w-6"></div>
 
           {/* North Glow Feedback */}
-          <div id="north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.15) 0%, transparent 25%);"></div>
+          <div id="north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.15) 0%, transparent 25%);"></div>
         </div>
 
         {/* Degree Display */}
@@ -158,37 +154,26 @@ import SensorStatus from '../components/SensorStatus.astro';
     </div>
 
     <div class="relative flex h-[min(80vw,380px)] w-[min(80vw,380px)] items-center justify-center">
-      {/* Outer Metallic Ring */}
-      <div class="compass-outer-ring absolute inset-0 rounded-full"></div>
+      <div class="compass-outer-ring absolute inset-0 rounded-full border border-hairline bg-canvas"></div>
+      <div class="compass-north-marker absolute top-1 left-1/2 h-0 w-0 -translate-x-1/2 z-20" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 14px solid #cc0000;"></div>
 
-      {/* North Marker */}
-      <div class="compass-north-marker absolute -top-0 left-1/2 h-0 w-0 -translate-x-1/2" style="border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 14px solid #cc0000;"></div>
-
-      {/* Inner Compass Face */}
-      <div class="compass-inner-face absolute inset-[12px] rounded-full">
-        {/* Degree Markers */}
+      <div class="compass-inner-face absolute inset-0 rounded-full flex items-center justify-center">
         {Array.from({ length: 72 }, (_, i) => i * 5).map((deg) => (
-          <div class="absolute h-full w-px origin-center" style={{ transform: `rotate(${deg}deg)` }}>
+          <div class="absolute h-full w-px top-0 left-1/2 -translate-x-1/2 origin-center" style={{ transform: `rotate(${deg}deg)` }}>
             <div class:list={[
-              'mx-auto',
+              'mx-auto mt-3',
               deg % 90 === 0 ? 'h-4 w-[2px]' : deg % 30 === 0 ? 'h-3 w-[1.5px]' : 'h-2.5 w-px',
             ]} style={{
-              background: deg % 90 === 0
-                ? (deg === 0 ? '#cc0000' : 'var(--color-ink)')
-                : deg % 30 === 0
-                ? 'var(--color-body)'
-                : 'var(--color-mute)',
+              background: deg % 90 === 0 ? (deg === 0 ? '#cc0000' : 'var(--color-ink)') : deg % 30 === 0 ? 'var(--color-body)' : 'var(--color-mute)',
             }}></div>
           </div>
         ))}
 
-        {/* Cardinal Labels */}
-        <span class="compass-cardinal-label absolute top-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-error">N</span>
-        <span class="compass-cardinal-label absolute bottom-6 left-1/2 -translate-x-1/2 text-[14px] font-mono text-ink">S</span>
-        <span class="compass-cardinal-label absolute top-1/2 left-6 -translate-y-1/2 text-[14px] font-mono text-ink">W</span>
-        <span class="compass-cardinal-label absolute top-1/2 right-6 -translate-y-1/2 text-[14px] font-mono text-ink">E</span>
+        <span class="compass-cardinal-label absolute top-8 left-1/2 -translate-x-1/2 text-[14px] font-mono font-bold text-error">N</span>
+        <span class="compass-cardinal-label absolute bottom-8 left-1/2 -translate-x-1/2 text-[14px] font-mono text-ink">S</span>
+        <span class="compass-cardinal-label absolute left-8 top-1/2 -translate-y-1/2 text-[14px] font-mono text-ink">W</span>
+        <span class="compass-cardinal-label absolute right-8 top-1/2 -translate-y-1/2 text-[14px] font-mono text-ink">E</span>
 
-        {/* Intercardinal Labels */}
         {[
           { label: 'NE', angle: 45 },
           { label: 'SE', angle: 135 },
@@ -196,13 +181,13 @@ import SensorStatus from '../components/SensorStatus.astro';
           { label: 'NW', angle: 315 },
         ].map(({ label, angle }) => {
           const rad = (angle - 90) * (Math.PI / 180);
-          const r = 110;
+          const radiusPercent = 28;
           return (
             <span
               class="compass-intercardinal-label absolute text-[10px] font-mono text-body"
               style={{
-                left: `calc(50% + ${r * Math.cos(rad)}px)`,
-                top: `calc(50% + ${r * Math.sin(rad)}px)`,
+                left: `calc(50% + ${radiusPercent * Math.cos(rad)}%)`,
+                top: `calc(50% + ${radiusPercent * Math.sin(rad)}%)`,
                 transform: 'translate(-50%, -50%)',
               }}
             >
@@ -212,21 +197,13 @@ import SensorStatus from '../components/SensorStatus.astro';
         })}
       </div>
 
-      {/* Compass Needle */}
-      <div id="fs-needle" class="absolute h-full w-full" style="transform: rotate(0deg);">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-          <div class="compass-needle-north" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 105px solid #cc0000;"></div>
-        </div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2">
-          <div class="compass-needle-south" style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 105px solid #2d2d44;"></div>
-        </div>
+      <div id="fs-needle" class="absolute inset-0 z-10 transition-transform duration-75 ease-out" style="transform: rotate(0deg);">
+        <div class="absolute bottom-1/2 left-1/2 -translate-x-1/2 h-[35%] w-3 bg-error rounded-t-full origin-bottom"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 h-[35%] w-3 bg-zinc-700 rounded-b-full origin-top"></div>
       </div>
 
-      {/* Center Hub */}
-      <div class="compass-center-hub absolute h-5 w-5 rounded-full"></div>
-
-      {/* North Glow Feedback */}
-      <div id="fs-north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-500" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.15) 0%, transparent 25%);"></div>
+      <div class="compass-center-hub absolute h-5 w-5 rounded-full bg-canvas shadow border border-hairline z-20"></div>
+      <div id="fs-north-glow" class="pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300" style="background: radial-gradient(circle at 50% 8%, rgba(238,0,0,0.15) 0%, transparent 25%);"></div>
     </div>
 
     <div class="mt-6 text-center">
@@ -238,13 +215,7 @@ import SensorStatus from '../components/SensorStatus.astro';
   </div>
 
   {/* Permission Modal */}
-  <div
-    id="permission-modal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/40 backdrop-blur-sm"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modal-title"
-  >
+  <div id="permission-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-ink/40 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="mx-4 w-full max-w-sm rounded-2xl bg-canvas p-6 shadow-float">
       <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-canvas-soft-2">
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -255,9 +226,7 @@ import SensorStatus from '../components/SensorStatus.astro';
         </svg>
       </div>
       <h2 id="modal-title" class="text-center text-base font-semibold text-ink">Enable Compass</h2>
-      <p class="mt-2 text-center text-sm text-body leading-relaxed">
-        This compass needs access to your device sensors to determine direction.
-      </p>
+      <p class="mt-2 text-center text-sm text-body leading-relaxed">This compass needs access to your device sensors to determine direction.</p>
       <div id="modal-loading" class="hidden mt-5 flex items-center justify-center gap-2 py-3">
         <svg class="h-4 w-4 animate-spin text-body" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25" />
@@ -266,12 +235,8 @@ import SensorStatus from '../components/SensorStatus.astro';
         <span class="text-sm text-body">Requesting access…</span>
       </div>
       <div id="modal-buttons" class="mt-5 flex gap-3">
-        <button id="modal-cancel" class="flex-1 h-10 rounded-full bg-canvas-soft-2 px-4 text-sm font-medium text-body transition-colors hover:bg-canvas-soft">
-          Cancel
-        </button>
-        <button id="modal-enable" class="flex-1 h-10 rounded-full bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-ink/80">
-          Enable Compass
-        </button>
+        <button id="modal-cancel" class="flex-1 h-10 rounded-full bg-canvas-soft-2 px-4 text-sm font-medium text-body transition-colors hover:bg-canvas-soft">Cancel</button>
+        <button id="modal-enable" class="flex-1 h-10 rounded-full bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-ink/80">Enable Compass</button>
       </div>
       <div id="modal-denied" class="hidden mt-4 rounded-lg bg-error-soft/30 p-3">
         <p class="text-xs text-error leading-relaxed" id="modal-denied-text"></p>
@@ -281,7 +246,6 @@ import SensorStatus from '../components/SensorStatus.astro';
 </Layout>
 
 <script>
-  // DOM elements
   const needleEl = document.getElementById('compass-needle');
   const degreesEl = document.getElementById('compass-degrees');
   const directionEl = document.getElementById('compass-direction');
@@ -304,30 +268,17 @@ import SensorStatus from '../components/SensorStatus.astro';
   const modalDenied = document.getElementById('modal-denied')!;
   const modalDeniedText = document.getElementById('modal-denied-text')!;
 
-  // State
   let isRunning = false;
   let isFullscreen = false;
-  let rawHeading = 0;       // Latest sensor reading — used for all display text
-  let displayHeading = 0;   // Smoothed value — used only for needle rotation
-  let lastFrameTime = 0;
-
-  // Animation config — visual only, zero impact on accuracy
-  const LERP_SPEED = 0.18;        // Needle interpolation per frame (~0.18 = smooth but responsive)
-  const DEAD_ZONE = 0.3;          // Minimal dead zone — preserve all real movement
-  const NORTH_THRESHOLD = 2;
-
-  // --- Helpers ---
+  let rawHeading = 0;
+  let displayHeading = 0;
+  const LERP_SPEED = 0.12; // Adjusted down slightly for ultimate fluidity 
+  const NORTH_THRESHOLD = 3;
 
   function showMessage(msg: string) {
-    if (messageEl) {
-      messageEl.textContent = msg;
-      messageEl.classList.remove('hidden');
-    }
+    if (messageEl) { messageEl.textContent = msg; messageEl.classList.remove('hidden'); }
   }
-
-  function hideMessage() {
-    messageEl?.classList.add('hidden');
-  }
+  function hideMessage() { messageEl?.classList.add('hidden'); }
 
   function setStatus(state: 'ready' | 'waiting' | 'error', message: string) {
     if (!statusEl) return;
@@ -342,32 +293,13 @@ import SensorStatus from '../components/SensorStatus.astro';
   }
 
   function showModal() {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    modalLoading.classList.add('hidden');
-    modalButtons.classList.remove('hidden');
-    modalDenied.classList.add('hidden');
-    document.body.style.overflow = 'hidden';
+    modal.classList.remove('hidden'); modal.classList.add('flex');
+    modalLoading.classList.add('hidden'); modalButtons.classList.remove('hidden');
+    modalDenied.classList.add('hidden'); document.body.style.overflow = 'hidden';
   }
-
-  function hideModal() {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.body.style.overflow = '';
-  }
-
-  function showModalLoading() {
-    modalLoading.classList.remove('hidden');
-    modalButtons.classList.add('hidden');
-    modalDenied.classList.add('hidden');
-  }
-
-  function showModalDenied(msg: string) {
-    modalLoading.classList.add('hidden');
-    modalButtons.classList.add('hidden');
-    modalDenied.classList.remove('hidden');
-    modalDeniedText.textContent = msg;
-  }
+  function hideModal() { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow = ''; }
+  function showModalLoading() { modalLoading.classList.remove('hidden'); modalButtons.classList.add('hidden'); modalDenied.classList.add('hidden'); }
+  function showModalDenied(msg: string) { modalLoading.classList.add('hidden'); modalButtons.classList.add('hidden'); modalDenied.classList.remove('hidden'); modalDeniedText.textContent = msg; }
 
   function getCardinal(deg: number): string {
     const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -379,8 +311,6 @@ import SensorStatus from '../components/SensorStatus.astro';
     return names[Math.round(deg / 45) % 8];
   }
 
-  // --- Smooth Needle Logic ---
-
   function shortestRotation(from: number, to: number): number {
     let diff = to - from;
     if (diff > 180) diff -= 360;
@@ -388,62 +318,52 @@ import SensorStatus from '../components/SensorStatus.astro';
     return diff;
   }
 
-  function animate(now: number) {
-    // Interpolate needle rotation toward raw heading (visual only)
+  // Engine Animation Loop for Butter Smooth transitions
+  function animate() {
     const diff = shortestRotation(displayHeading, rawHeading);
+    displayHeading += diff * LERP_SPEED;
+    displayHeading = ((displayHeading % 360) + 360) % 360;
 
-    if (Math.abs(diff) > DEAD_ZONE) {
-      displayHeading += diff * LERP_SPEED;
-      displayHeading = ((displayHeading % 360) + 360) % 360;
-    } else {
-      displayHeading = rawHeading;
-    }
-
+    // Use inverted rotation logic for the dial experience, or standard for absolute needle matching
     updateDisplay(rawHeading, displayHeading);
     requestAnimationFrame(animate);
   }
 
-  // --- North Alignment Feedback ---
-
   function updateNorthFeedback(heading: number) {
     const distFromNorth = Math.min(heading, 360 - heading);
     const isNearNorth = distFromNorth <= NORTH_THRESHOLD;
-
     if (northGlow) northGlow.style.opacity = isNearNorth ? '1' : '0';
     if (fsNorthGlow) fsNorthGlow.style.opacity = isNearNorth ? '1' : '0';
   }
-
-  // --- Update Display ---
 
   function updateDisplay(raw: number, needle: number) {
     const rounded = Math.round(raw);
     const cardinal = getCardinal(raw);
     const dirName = getDirectionName(raw);
 
-    if (needleEl) needleEl.style.transform = `rotate(${needle}deg)`;
+    // To turn the face instead of the needle (highly popular in UX), invert the rotation value: `-needle`
+    if (needleEl) needleEl.style.transform = `rotate(${-needle}deg)`;
     if (degreesEl) degreesEl.textContent = ((rounded % 360) + 360) % 360 + '';
     if (directionEl) directionEl.textContent = `${dirName} (${cardinal})`;
-
-    if (fsNeedle) fsNeedle.style.transform = `rotate(${needle}deg)`;
+    if (fsNeedle) fsNeedle.style.transform = `rotate(${-needle}deg)`;
     if (fsDegrees) fsDegrees.textContent = ((rounded % 360) + 360) % 360 + '';
     if (fsDirection) fsDirection.textContent = dirName;
 
     updateNorthFeedback(raw);
   }
 
-  // --- Orientation Handler ---
-
   function handleOrientation(event: DeviceOrientationEvent) {
     let raw: number | null = null;
 
     if ('webkitCompassHeading' in event) {
+      // iOS devices
       raw = (event as any).webkitCompassHeading;
     } else if (event.alpha !== null) {
-      raw = event.absolute ? 360 - event.alpha : 360 - event.alpha;
+      // Android devices absolute calculation transformation
+      raw = (event as any).absolute ? 360 - event.alpha : 360 - event.alpha;
     }
 
     if (raw === null || isNaN(raw)) return;
-
     raw = ((raw % 360) + 360) % 360;
 
     if (!isRunning) {
@@ -459,145 +379,86 @@ import SensorStatus from '../components/SensorStatus.astro';
     rawHeading = raw;
   }
 
-  // --- Fullscreen ---
-
   function enterFullscreen() {
-    fullscreenOverlay?.classList.add('active');
-    isFullscreen = true;
-    document.body.style.overflow = 'hidden';
-
+    fullscreenOverlay?.classList.add('active'); isFullscreen = true; document.body.style.overflow = 'hidden';
     const el = fullscreenOverlay as any;
-    if (el.requestFullscreen) {
-      el.requestFullscreen().catch(() => {});
-    } else if (el.webkitRequestFullscreen) {
-      el.webkitRequestFullscreen();
-    }
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   }
 
   function exitFullscreen() {
-    fullscreenOverlay?.classList.remove('active');
-    isFullscreen = false;
-    document.body.style.overflow = '';
-
-    if (document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {});
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
+    fullscreenOverlay?.classList.remove('active'); isFullscreen = false; document.body.style.overflow = '';
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
   }
 
   fullscreenBtn?.addEventListener('click', enterFullscreen);
   fullscreenClose?.addEventListener('click', exitFullscreen);
-
-  document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && isFullscreen) {
-      exitFullscreen();
-    }
-  });
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && isFullscreen) exitFullscreen(); });
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (isFullscreen) exitFullscreen();
-      else if (!modal.classList.contains('hidden')) {
-        hideModal();
-        setStatus('waiting', 'Permission needed');
-      }
+      else if (!modal.classList.contains('hidden')) { hideModal(); setStatus('waiting', 'Permission needed'); }
     }
   });
 
-  // --- Permission ---
-
   async function requestPermission() {
     showModalLoading();
-
     if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
       try {
         const permission = await (DeviceOrientationEvent as any).requestPermission();
         if (permission === 'granted') {
           window.addEventListener('deviceorientation', handleOrientation, true);
-          hideModal();
-          setStatus('ready', 'Sensors ready');
+          hideModal(); setStatus('ready', 'Sensors ready');
         } else {
-          showModalDenied(
-            'Compass access was denied. To enable it:\n' +
-            '1. Open Settings → Safari\n' +
-            '2. Tap "Motion & Orientation Access"\n' +
-            '3. Enable it, then reload this page'
-          );
+          showModalDenied('Compass access was denied.');
           setStatus('error', 'Permission denied');
         }
       } catch (err: any) {
-        showModalDenied('Could not request compass access. Try reloading the page.');
+        showModalDenied('Could not request compass access.');
         setStatus('error', 'Permission error');
       }
     } else if ('DeviceOrientationEvent' in window) {
-      window.addEventListener('deviceorientation', handleOrientation, true);
+      // For absolute true North targeting setup on newer Android variants
+      if ('ondeviceorientationabsolute' in window) {
+         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+      } else {
+         window.addEventListener('deviceorientation', handleOrientation, true);
+      }
       hideModal();
       setStatus('ready', 'Listening…');
-
-      setTimeout(() => {
-        if (!isRunning) {
-          setStatus('error', 'No data');
-          showMessage('Your device does not support compass sensors.');
-        }
-      }, 2000);
+      setTimeout(() => { if (!isRunning) { setStatus('error', 'No data'); showMessage('Sensor data stream not starting.'); } }, 2000);
     } else {
-      showModalDenied('Your browser does not support device orientation sensors.');
+      showModalDenied('Sensors not supported.');
       setStatus('error', 'Not supported');
     }
   }
 
-  // --- Init ---
-
   function init() {
-    if (!window.isSecureContext) {
-      setStatus('error', 'Insecure connection');
-      showMessage('Compass access requires a secure HTTPS connection.');
-      return;
-    }
-
-    if (!('DeviceOrientationEvent' in window)) {
-      setStatus('error', 'Not supported');
-      showMessage('Your device does not support compass sensors.');
-      return;
-    }
-
-    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-      setStatus('waiting', 'Permission needed');
-      showModal();
-      return;
-    }
+    if (!window.isSecureContext) { setStatus('error', 'Insecure connection'); showMessage('Compass access requires HTTPS.'); return; }
+    if (!('DeviceOrientationEvent' in window)) { setStatus('error', 'Not supported'); showMessage('Device does not support compass sensors.'); return; }
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') { setStatus('waiting', 'Permission needed'); showModal(); return; }
 
     let gotData = false;
     const testHandler = (e: DeviceOrientationEvent) => {
       if (e.alpha !== null || ('webkitCompassHeading' in e)) {
         gotData = true;
         window.removeEventListener('deviceorientation', testHandler, true);
-        window.addEventListener('deviceorientation', handleOrientation, true);
+        if ('ondeviceorientationabsolute' in window) {
+          window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        } else {
+          window.addEventListener('deviceorientation', handleOrientation, true);
+        }
         setStatus('ready', 'Sensors ready');
       }
     };
+    
     window.addEventListener('deviceorientation', testHandler, true);
-
-    setTimeout(() => {
-      if (!gotData && !isRunning) {
-        setStatus('error', 'No sensors');
-        showMessage('Your device does not support compass sensors.');
-      }
-    }, 2000);
+    setTimeout(() => { if (!gotData && !isRunning) { setStatus('error', 'No sensors'); showMessage('No hardware sensor response.'); } }, 2000);
   }
 
   modalEnable.addEventListener('click', requestPermission);
-  modalCancel.addEventListener('click', () => {
-    hideModal();
-    setStatus('waiting', 'Permission needed');
-  });
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      hideModal();
-      setStatus('waiting', 'Permission needed');
-    }
-  });
-
+  modalCancel.addEventListener('click', () => { hideModal(); setStatus('waiting', 'Permission needed'); });
   init();
 </script>
