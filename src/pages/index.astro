@@ -183,6 +183,265 @@ const tools = [
     </div>
   </section>
 
+  {/* FAQ Section */}
+  <section class="bg-canvas-soft">
+    <div class="mx-auto max-w-[1400px] px-6 py-24">
+      <div class="mb-12 text-center">
+        <span class="mb-3 inline-block rounded-full bg-canvas-soft-2 px-3 py-1 text-xs font-mono uppercase tracking-wider text-mute">
+          FAQ
+        </span>
+        <h2 class="text-2xl font-semibold tracking-tight text-ink md:text-[32px] md:leading-[40px] md:tracking-[-1.28px]">
+          Frequently asked questions
+        </h2>
+        <p class="mx-auto mt-4 max-w-lg text-body">
+          Everything you need to know about using our browser-based measurement tools.
+        </p>
+      </div>
+
+      <div class="mx-auto max-w-3xl space-y-16">
+        {/* Compass FAQs */}
+        <div>
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink">
+            <span class="text-xl">🧭</span> Compass FAQs
+          </h3>
+          <div class="space-y-2">
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How do I use and read an online compass?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                Using an online compass is simple: open the tool and hold your device flat, parallel to the ground. The compass rose will automatically orient itself. To read it, look at the degree mark or cardinal direction (North, South, East, West) positioned at the top of the screen. The needle pointing directly away from you indicates your current heading.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How does a digital web compass actually work?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                A web-based compass works by accessing your smartphone or tablet's built-in magnetometer. This internal hardware sensor detects the Earth's magnetic field. The web tool reads this sensor data in real-time and translates it into the visual compass display on your screen.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How can I tell exactly which direction I am facing right now?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                To find your exact bearing, hold your phone flat in front of you with the top edge pointing in the direction you are looking. The degree number (from 0° to 360°) and the cardinal letter (like N, NE, SW) displayed at the top center of the compass interface indicate the exact direction you are currently facing.
+              </div>
+            </details>
+          </div>
+        </div>
+
+        {/* Speedometer FAQs */}
+        <div>
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink">
+            <span class="text-xl">⏱️</span> Speedometer FAQs
+          </h3>
+          <div class="space-y-2">
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                Why does my phone's speedometer lag when I accelerate or brake quickly?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                Phone speedometers rely on GPS data, which updates at a set polling rate (usually once per second). When you brake or accelerate suddenly, there is a brief delay between your actual speed change and the GPS receiver catching up to calculate the new distance over time. This creates a slight, temporary lag.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                Is a mobile GPS speedometer accurate while driving up or down steep hills?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                GPS speedometers are generally highly accurate on flat terrain, but they can lose slight accuracy on steep inclines or declines. Standard GPS calculates your horizontal speed across the Earth's surface (2D distance) and may not perfectly account for the vertical change in elevation (3D distance), resulting in a marginally lower speed reading on steep hills.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                Why do different speedometer apps and websites show slightly different speeds?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                Different tools use varying algorithms to smooth out raw GPS data. Some update more frequently, while others average your speed over a few seconds to prevent the numbers from jumping erratically. Additionally, differences in how web browsers process location data versus native mobile apps can lead to minor variations in the displayed speed.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                Why is my online speedometer not working or showing zero?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                If the speedometer is stuck at zero, the tool likely doesn't have permission to access your device's location. Ensure that GPS/Location Services are turned on in your device settings and that you have explicitly granted your web browser permission to access your location. It also requires a clear view of the sky to connect to GPS satellites.
+              </div>
+            </details>
+          </div>
+        </div>
+
+        {/* EMF Meter FAQs */}
+        <div>
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink">
+            <span class="text-xl">⚡</span> EMF Meter FAQs
+          </h3>
+          <div class="space-y-2">
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                What is an EMF meter and what does it measure?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                An EMF (Electromagnetic Field) meter is a tool used to measure ambient electromagnetic radiation in your environment. It detects invisible fields of energy emitted by power lines, electrical wiring, and electronic devices, typically displaying the measurements in microteslas (µT) or milligauss (mG).
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How do I use an EMF meter on my phone?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                To use a web-based EMF meter, simply open the tool and slowly move your smartphone around the area or object you want to test. The tool utilizes your device's built-in magnetic sensor. Move the phone close to electronic appliances, wall outlets, or circuit breakers to observe spikes in the electromagnetic field readings.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How do I read EMF meter results and what is a normal level?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                A normal background EMF reading in a typical home is usually between 0.1 to 3.0 milligauss (mG) or 0.01 to 0.3 microteslas (µT). When you bring the device near active electronics, the numbers will rise significantly. Consistently high readings in the middle of a room, away from obvious appliances, may warrant further investigation.
+              </div>
+            </details>
+          </div>
+        </div>
+
+        {/* Inclinometer FAQs */}
+        <div>
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink">
+            <span class="text-xl">📐</span> Inclinometer FAQs
+          </h3>
+          <div class="space-y-2">
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                What is an online inclinometer used for?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                An online inclinometer (or clinometer) measures the angle of a slope, tilt, or elevation relative to gravity. It is highly useful for DIY projects, checking roof pitches, aligning satellite dishes, carpentry, or ensuring surfaces are at a specific gradient.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How accurate is a web-based clinometer or slope measurer?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                Web inclinometers are very accurate for general use. They utilize the highly sensitive accelerometer gyroscope sensors built into modern smartphones to calculate angles down to a fraction of a degree. For the best accuracy, ensure your phone case is flat and doesn't interfere with the edge of the device.
+              </div>
+            </details>
+          </div>
+        </div>
+
+        {/* Spirit Level FAQs */}
+        <div>
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink">
+            <span class="text-xl">🏗️</span> Spirit Level (Bubble Level) FAQs
+          </h3>
+          <div class="space-y-2">
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How do I use an online spirit level to make sure something is straight?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                To check if a horizontal surface is flat, lay your phone flat on its back on the surface; the digital bubble should rest exactly in the center crosshairs. To check if a vertical surface (like a picture frame or wall) is plumb, rest the side or bottom edge of your phone against it until the bubble aligns in the center of the vertical tube.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                Do I need to calibrate my digital bubble level?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                While most modern phones are pre-calibrated, it is best practice to calibrate the tool before a critical job. Simply place your phone on a surface you know to be perfectly level and press the "calibrate" button if the tool provides one. This zeros out the sensor for maximum precision.
+              </div>
+            </details>
+          </div>
+        </div>
+
+        {/* Light Meter FAQs */}
+        <div>
+          <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-ink">
+            <span class="text-xl">☀️</span> Light Meter (Lux Meter) FAQs
+          </h3>
+          <div class="space-y-2">
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                How does an online light meter measure lux?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                An online light meter accesses the ambient light sensor on your smartphone, which is typically located on the front of the device near the selfie camera. The tool reads the raw data from this sensor and converts it into Lux, the standard unit of measurement for illuminance and light intensity.
+              </div>
+            </details>
+
+            <details class="group rounded-xl bg-canvas shadow-card">
+              <summary class="flex cursor-pointer items-center justify-between px-6 py-4 text-sm font-medium text-ink select-none">
+                What is a good lux level for a typical room or office?
+                <svg class="h-4 w-4 text-mute transition-transform duration-200 group-open:rotate-180" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 5.25l3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <div class="px-6 pb-5 text-sm text-body leading-relaxed">
+                For general household living spaces, a lux level between 100 and 300 is typically sufficient. For an office workspace or reading area, you generally want brighter illumination, ideally between 300 and 500 lux, to prevent eye strain and maintain focus.
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   {/* CTA Band */}
   <section class="bg-primary">
     <div class="mx-auto max-w-[1400px] px-6 py-24 text-center">
