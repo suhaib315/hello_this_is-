@@ -389,7 +389,7 @@ import SensorStatus from '../components/SensorStatus.astro';
   function exitFullscreen() {
     fullscreenOverlay?.classList.remove('active'); isFullscreen = false; document.body.style.overflow = '';
     if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+     else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen();
   }
 
   fullscreenBtn?.addEventListener('click', enterFullscreen);
@@ -421,11 +421,12 @@ import SensorStatus from '../components/SensorStatus.astro';
       }
     } else if ('DeviceOrientationEvent' in window) {
       // For absolute true North targeting setup on newer Android variants
-      if ('ondeviceorientationabsolute' in window) {
-         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-      } else {
-         window.addEventListener('deviceorientation', handleOrientation, true);
-      }
+    if ('ondeviceorientationabsolute' in window) {
+    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+  } else {
+    // @ts-ignore
+    window.addEventListener('deviceorientation', handleOrientation);
+  }
       hideModal();
       setStatus('ready', 'Listening…');
       setTimeout(() => { if (!isRunning) { setStatus('error', 'No data'); showMessage('Sensor data stream not starting.'); } }, 2000);
@@ -446,17 +447,19 @@ import SensorStatus from '../components/SensorStatus.astro';
         gotData = true;
         window.removeEventListener('deviceorientation', testHandler, true);
         if ('ondeviceorientationabsolute' in window) {
-          window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-        } else {
-          window.addEventListener('deviceorientation', handleOrientation, true);
-        }
-        setStatus('ready', 'Sensors ready');
-      }
+    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+  } else {
+    // @ts-ignore
+    window.addEventListener('deviceorientation', handleOrientation);
+  }
     };
+  }
+  
     
     window.addEventListener('deviceorientation', testHandler, true);
     setTimeout(() => { if (!gotData && !isRunning) { setStatus('error', 'No sensors'); showMessage('No hardware sensor response.'); } }, 2000);
   }
+  
 
   modalEnable.addEventListener('click', requestPermission);
   modalCancel.addEventListener('click', () => { hideModal(); setStatus('waiting', 'Permission needed'); });
